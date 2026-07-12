@@ -1,6 +1,6 @@
 # PRD — FlashTap
 
-> **Versão:** 2.1
+> **Versão:** 2.2
 > **Status:** MVP
 > **Produto:** FlashTap
 > **Plataforma:** Web
@@ -79,18 +79,18 @@ Exemplos:
 2.4
 5.3
 9.5
-10
+12
 ```
 
-O objetivo final é concluir completamente o nível 10.
+O objetivo final é concluir completamente o nível 12.
 
 ---
 
 # 5. Regras Gerais
 
-O tabuleiro possui exatamente dez botões.
+O tabuleiro possui exatamente doze botões de ação, organizados em grade de 4 linhas × 3 colunas, com uma 5ª linha exclusiva para o botão "Enviar".
 
-Cada rodada apresenta uma quantidade de botões vermelhos igual ao nível atual.
+Cada rodada apresenta uma quantidade de botões acesos igual ao nível atual.
 
 Após memorizar os botões, o jogador deve reproduzir exatamente a mesma combinação.
 
@@ -124,7 +124,7 @@ Rodada 5
 
 Ao concluir as cinco rodadas, o jogador avança automaticamente para o próximo nível.
 
-O nível determina **quantos botões acendem** por rodada (N = nível); a rodada dentro do nível apenas varia o sorteio de quais botões (dentre os 10) serão N, mantendo a repetição de dificuldade constante ao longo das 5 tentativas daquele nível antes de subir.
+O nível determina **quantos botões acendem** por rodada (N = nível); a rodada dentro do nível apenas varia o sorteio de quais botões (dentre os 12) serão N, mantendo a repetição de dificuldade constante ao longo das 5 tentativas daquele nível antes de subir.
 
 ---
 
@@ -146,7 +146,7 @@ Durante uma rodada:
 
 O jogador vence quando concluir:
 
-- Nível 10
+- Nível 12
 - Rodada 5
 
 ---
@@ -276,7 +276,7 @@ Exibir:
 
 - Logo
 - Botão Jogar
-- Melhor Recorde
+- Melhor Recorde (exibir "—" quando não houver recorde ainda)
 
 ---
 
@@ -287,8 +287,14 @@ Exibir:
 - Nível atual
 - Rodada atual
 - Tempo
-- Painel de 10 botões
-- Botão Enviar
+- Painel de 12 botões de ação (grade 4 linhas × 3 colunas)
+- Botão Enviar (5ª linha, isolado dos botões de ação)
+
+---
+
+## Modal "Como Jogar"
+
+Exibido automaticamente no primeiro acesso do usuário (antes da primeira partida), explicando a mecânica básica. Reaberto manualmente a qualquer momento via ícone de ajuda ("?") na tela de Jogo. O fato de já ter sido visto é persistido localmente para não reaparecer automaticamente em acessos futuros.
 
 ---
 
@@ -315,6 +321,9 @@ Exibir:
 - Resultado
 - Recorde Local
 - Responsividade
+- Modal "Como Jogar" (primeiro acesso + reabertura manual)
+- Tema Claro/Escuro (segue preferência do sistema, com toggle manual)
+- Identidade visual (logo/wordmark do FlashTap)
 
 ## Fora do Escopo
 
@@ -324,8 +333,7 @@ Exibir:
 - Ranking Online
 - Multiplayer
 - Modos Extras
-- Temas
-- Sons configuráveis
+- Som (MVP 100% silencioso, nenhum som fixo ou configurável)
 - Configurações avançadas
 
 ---
@@ -430,7 +438,7 @@ O sistema deverá:
 
 ### RF-01
 
-Exibir um painel contendo exatamente dez botões.
+Exibir um painel contendo exatamente doze botões de ação, em grade de 4 linhas × 3 colunas.
 
 ### RF-02
 
@@ -438,7 +446,7 @@ Sortear aleatoriamente os botões de cada rodada.
 
 ### RF-03
 
-Exibir os botões sorteados em vermelho.
+Exibir os botões sorteados no estado "Showing" (destaque visual definido no GRS).
 
 ### RF-04
 
@@ -450,7 +458,7 @@ Permitir que o jogador selecione os botões corretos.
 
 ### RF-06
 
-Alterar botões corretos para verde.
+Alterar botões corretos para o estado "Selected" (destaque visual definido no GRS).
 
 ### RF-07
 
@@ -495,6 +503,18 @@ Exibir tela de Vitória.
 ### RF-17 *(a definir)*
 
 Caso exista tempo máximo de resposta por rodada, encerrar a partida automaticamente ao estourá-lo.
+
+### RF-18
+
+Exibir modal "Como Jogar" automaticamente no primeiro acesso do usuário; permitir reabertura manual via ícone de ajuda durante o jogo.
+
+### RF-19
+
+Suportar tema claro e escuro, seguindo `prefers-color-scheme` do sistema por padrão, com opção de alternância manual pelo usuário.
+
+### RF-20
+
+Exibir "—" no campo de Melhor Recorde da Home quando o usuário ainda não tiver nenhum recorde registrado.
 
 ---
 
@@ -544,22 +564,52 @@ Não haverá coleta de analytics externos nesta versão.
 
 # 24. Casos de Borda a Definir
 
-- Existe tempo máximo de resposta por rodada? Se sim, qual valor e o que acontece ao estourar (RF-17)?
-- O tempo de exibição da sequência (memorização) é fixo em todos os níveis ou diminui conforme o nível aumenta?
+- Existe tempo máximo de resposta por rodada (diferente do tempo de exibição/memorização, já definido no GRS)? Se sim, qual valor e o que acontece ao estourar (RF-17)? — segue em aberto.
 - Ao clicar em um botão errado (RF-08), a partida encerra mesmo que ainda faltem botões certos por selecionar, ou só é permitido clicar dentro do conjunto correto?
 - O usuário pode cancelar/reiniciar uma partida em andamento antes de perder ou vencer?
 
 ---
 
-# 25. Roadmap Futuro (Fora do MVP)
+# 25. Identidade Visual e UX
+
+## Tom Visual
+
+Vibrante e energético, comunicando velocidade e reflexo — não uma estética pastel/calma. A paleta de estados dos botões (GRS seção 8: âmbar/showing, teal/selected, carmim/wrong) já reflete essa direção; fundo, tipografia e elementos de UI devem seguir a mesma energia.
+
+## Identidade / Logo
+
+Direção proposta: wordmark em tipografia geométrica bold, combinado a um ícone que una os dois conceitos do nome — um raio (flash/velocidade) integrado a um círculo ou ponto de toque (tap). Paleta do logo ancorada nas cores de destaque já definidas no GRS (âmbar/teal), para manter consistência entre marca e interface do jogo.
+
+## Tema Claro/Escuro
+
+Suporte a ambos os temas, com detecção automática via `prefers-color-scheme` do sistema operacional/navegador, e um controle manual de alternância disponível na interface (ver RF-19). Os 4 estados de botão do GRS (seção 8) possuem variante calibrada para cada tema, mantendo o mesmo significado semântico e reforço não-cromático em ambos.
+
+## Onboarding
+
+Modal "Como Jogar" exibido automaticamente no primeiro acesso, antes da primeira partida — nunca durante uma partida em andamento. Reaberto manualmente a qualquer momento via ícone de ajuda. A flag de "já visto" é persistida localmente (ver ADR de persistência).
+
+## Áudio
+
+MVP 100% silencioso — nenhum som fixo, nenhuma opção de som configurável. Toda a satisfação sensorial do feedback (o "pop" tátil do brinquedo físico original) é comunicada exclusivamente por animação visual (GRS seção 8: pulso de glow, "pop" de escala, shake), não por áudio.
+
+## Estado Vazio
+
+Campo de Melhor Recorde na Home exibe "—" quando o usuário ainda não completou nenhuma partida (ver RF-20).
+
+## Layout do Tabuleiro
+
+Grade fixa de 4 linhas × 3 colunas (12 botões de ação), com uma 5ª linha isolada contendo apenas o botão "Enviar" — nunca misturado com os botões de ação, para evitar cliques acidentais que encerrariam a partida (RF-08).
+
+---
+
+# 26. Roadmap Futuro (Fora do MVP)
 
 Possíveis evoluções futuras:
 
 - Ranking online
 - Login
 - Compartilhamento de recordes
-- Sons configuráveis
-- Temas visuais
+- Som (efeitos sonoros opcionais/configuráveis)
 - Modo Zen
 - Modo Hardcore
 - Modo Infinito

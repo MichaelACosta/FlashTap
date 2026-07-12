@@ -1,7 +1,7 @@
 # Game Rules Specification (GRS)
 
 > Produto: FlashTap
-> Versão: 1.1
+> Versão: 1.2
 > Status: MVP
 
 ---
@@ -29,14 +29,20 @@ Qualquer implementação da Game Engine deverá seguir este documento.
 
 # 3. Estrutura do Tabuleiro
 
-O tabuleiro possui exatamente **10 botões**.
+O tabuleiro possui exatamente **12 botões de ação**, organizados em uma grade de **4 linhas × 3 colunas**, mais uma **5ª linha exclusiva contendo o botão "Enviar"** (não é um botão de ação/sequência, não participa do sorteio).
 
-Cada botão possui um identificador único.
+Cada botão de ação possui um identificador único.
 
 ```text
-1 2 3 4 5
+1  2  3
 
-6 7 8 9 10
+4  5  6
+
+7  8  9
+
+10 11 12
+
+[      Enviar      ]
 ```
 
 Os identificadores nunca mudam durante uma partida.
@@ -47,7 +53,7 @@ Os identificadores nunca mudam durante uma partida.
 
 O jogo possui:
 
-- 10 níveis
+- 12 níveis
 
 Cada nível possui:
 
@@ -79,6 +85,8 @@ Exemplo
 |8|8|
 |9|9|
 |10|10|
+|11|11|
+|12|12|
 
 ---
 
@@ -150,7 +158,7 @@ O tempo de exibição escala com o nível atual (N = quantidade de botões da ro
 ```text
 tempo_exibicao (ms) = 800 + (N × 300)
 
-teto máximo = 3500 ms
+teto máximo = 4000 ms
 ```
 
 Exemplo:
@@ -159,8 +167,9 @@ Exemplo:
 |---|---|
 | 1 | 1100ms |
 | 5 | 2300ms |
-| 9 | 3500ms (teto atingido) |
-| 10 | 3500ms (teto atingido) |
+| 9 | 3500ms |
+| 11 | 4000ms (teto atingido) |
+| 12 | 4000ms (teto atingido) |
 
 ---
 
@@ -203,6 +212,12 @@ Cor: vermelho-carmim.
 Reforço: shake (tremor) + ícone de X.
 
 Exibido apenas no botão clicado incorretamente, no momento do Game Over. Não substitui nem revela os demais botões da sequência.
+
+---
+
+## Suporte a Tema Claro/Escuro
+
+Os 4 estados acima (Idle, Showing, Selected, Wrong) devem ter uma variante de cor calibrada para tema claro e outra para tema escuro, mantendo o mesmo significado semântico e o mesmo reforço não-cromático (ícone/animação) em ambos os temas. O contraste mínimo (WCAG AA) deve ser validado nas duas variantes, não apenas na variante clara.
 
 ---
 
@@ -328,7 +343,7 @@ Rodada = 1
 O jogador vence quando concluir:
 
 ```text
-Nível 10
+Nível 12
 
 Rodada 5
 ```
@@ -362,12 +377,13 @@ Exemplos
 
 | Progresso | Distância |
 |------------|-----------|
-|1.1|9 níveis e 4 rodadas|
-|3.2|7 níveis e 3 rodadas|
-|5.5|5 níveis|
-|9.4|1 nível e 1 rodada|
-|9.5|1 nível|
-|10|Concluído|
+|1.1|11 níveis e 4 rodadas|
+|3.2|9 níveis e 3 rodadas|
+|5.5|7 níveis|
+|9.4|3 níveis e 1 rodada|
+|9.5|3 níveis|
+|11.5|1 nível|
+|12|Concluído|
 
 ---
 
@@ -455,7 +471,7 @@ GameOver
 
 As seguintes regras nunca podem ser violadas:
 
-- existem exatamente 10 botões
+- existem exatamente 12 botões de ação (mais o botão Enviar, que não participa do sorteio)
 - sequência nunca possui repetição
 - botão Selected não pode ser clicado novamente
 - botão em estado Showing nunca aceita clique

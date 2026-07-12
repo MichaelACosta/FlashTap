@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlashTap — UI Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F7FA;
+    --surface: #FFFFFF;
+    --surface-2: #ECEFF4;
+    --text: #171A24;
+    --text-secondary: #6B7280;
+    --border: #E1E5EB;
+    --brand: #7C5CFC;
+    --brand-2: #FF3EA5;
+    --state-idle: #E4E7EC;
+    --state-idle-border: #C7CCD6;
+    --state-showing: #FFB020;
+    --state-showing-glow: rgba(255,176,32,0.55);
+    --state-selected: #17B8A6;
+    --state-wrong: #E5484D;
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-btn: 22%;
+    --shadow: 0 8px 24px rgba(23,26,36,0.08);
+  }
+
+  [data-theme="dark"] {
+    --bg: #0B0E14;
+    --surface: #151923;
+    --surface-2: #1E2330;
+    --text: #F5F7FA;
+    --text-secondary: #9AA3B2;
+    --border: #2A2F3D;
+    --state-idle: #2B3040;
+    --state-idle-border: #3C4257;
+    --state-showing: #FFC24D;
+    --state-showing-glow: rgba(255,194,77,0.45);
+    --state-selected: #2DD4BF;
+    --state-wrong: #FF5D63;
+    --shadow: 0 8px 28px rgba(0,0,0,0.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app-shell {
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-bottom: 24px;
+  }
+
+  /* ---------- Top controls (mockup only, não faz parte do produto) ---------- */
+  .mockup-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-bottom: 1px dashed var(--border);
+  }
+  .mockup-toolbar .label { font-family: 'JetBrains Mono', monospace; letter-spacing: 0.02em; }
+  .theme-toggle {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-row {
+    display: flex;
+    gap: 6px;
+    padding: 10px 18px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .nav-btn.active {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+  }
+
+  .screen { display: none; flex: 1; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ---------- HOME ---------- */
+  #screen-home {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 28px;
+    gap: 28px;
+  }
+  .logo-mark {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-icon {
+    width: 84px;
+    height: 84px;
+  }
+  .wordmark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: -0.01em;
+  }
+  .wordmark .accent { color: var(--brand); }
+  .tagline {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: -8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cta-play {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: white;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    border: none;
+    border-radius: 999px;
+    padding: 18px 56px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .record-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 28px;
+  }
+  .record-chip .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); }
+  .record-chip .value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; }
+
+  /* ---------- MODAL ---------- */
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,12,18,0.55);
+    display: none;
+    align-items: flex-end;
+    z-index: 10;
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal-sheet {
+    width: 100%;
+    background: var(--surface);
+    border-radius: 28px 28px 0 0;
+    padding: 28px 24px 32px;
+    box-shadow: 0 -12px 32px rgba(0,0,0,0.25);
+  }
+  .modal-sheet h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    margin: 0 0 14px;
+  }
+  .modal-sheet ol {
+    margin: 0 0 22px;
+    padding-left: 18px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .modal-sheet ol li b { color: var(--text); }
+  .modal-cta {
+    width: 100%;
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  /* ---------- GAME ---------- */
+  #screen-game { padding: 20px 20px 0; }
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+  .stat-chip {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .stat-chip .sub { display:block; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; text-transform:uppercase; letter-spacing:0.08em; color: var(--text-secondary); }
+  .timer-chip { font-size: 20px; }
+  .help-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .game-btn {
+    aspect-ratio: 1;
+    border-radius: var(--radius-btn);
+    border: none;
+    background: var(--state-idle);
+    box-shadow: inset 0 0 0 2px var(--state-idle-border);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    font-family: 'JetBrains Mono', monospace;
+    color: transparent;
+  }
+  .game-btn:active { transform: scale(0.94); }
+
+  .game-btn.showing {
+    background: var(--state-showing);
+    box-shadow: 0 0 0 6px var(--state-showing-glow), 0 0 26px var(--state-showing-glow);
+    animation: pulse 0.9s ease-in-out infinite;
+  }
+  .game-btn.selected {
+    background: var(--state-selected);
+    box-shadow: none;
+  }
+  .game-btn.selected::after {
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+  }
+  .game-btn.wrong {
+    background: var(--state-wrong);
+    animation: shake 0.4s ease;
+  }
+  .game-btn.wrong::after {
+    content: "✕";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.045); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .submit-row { padding-top: 4px; border-top: 1px dashed var(--border); margin-top: 4px; }
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    margin-top: 14px;
+  }
+  .submit-btn.enabled {
+    background: var(--brand);
+    color: white;
+    cursor: pointer;
+  }
+
+  .demo-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    flex-wrap: wrap;
+  }
+  .demo-controls button {
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .demo-label { font-size: 10px; color: var(--text-secondary); width: 100%; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ---------- RESULT ---------- */
+  #screen-result {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 28px;
+    gap: 20px;
+  }
+  .result-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); }
+  .result-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 44px;
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+  }
+  .result-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 6px; }
+  .result-card .value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 18px; }
+  .replay-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: white;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="mockup-toolbar">
+    <span class="label">FLASHTAP · UI MOCKUP</span>
+    <button class="theme-toggle" id="themeToggle">🌙 Escuro</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="nav-btn active" data-screen="home">Home</button>
+    <button class="nav-btn" data-screen="game">Jogo</button>
+    <button class="nav-btn" data-screen="result">Resultado</button>
+    <button class="nav-btn" id="openModalBtn">Modal Como Jogar</button>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="logo-mark">
+      <svg class="logo-icon" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="url(#grad)" stroke-width="4" opacity="0.35"/>
+        <path d="M55 8 L28 54 H46 L40 92 L74 42 H54 L55 8Z" fill="url(#grad)"/>
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="100" y2="100">
+            <stop offset="0%" stop-color="#7C5CFC"/>
+            <stop offset="100%" stop-color="#FF3EA5"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="wordmark">Flash<span class="accent">Tap</span></div>
+      <div class="tagline">Velocidade · Reflexo · Concentração</div>
+    </div>
+
+    <button class="cta-play" data-screen="game" onclick="maybeShowTutorial()">Jogar</button>
+
+    <div class="record-chip">
+      <span class="label">Melhor recorde</span>
+      <span class="value">—</span>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="screen-game">
+    <div class="game-header">
+      <div class="stat-chip"><span class="sub">Nível · Rodada</span>4.2</div>
+      <div class="stat-chip timer-chip"><span class="sub">Tempo</span>00:12.480</div>
+      <button class="help-btn" id="helpBtn">?</button>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="submit-row">
+      <button class="submit-btn" id="submitBtn">Enviar</button>
+    </div>
+
+    <div class="demo-controls">
+      <span class="demo-label">Controles do mockup (não fazem parte do produto)</span>
+      <button onclick="demoShowSequence(4)">Simular Nível 4</button>
+      <button onclick="demoShowSequence(9)">Simular Nível 9</button>
+      <button onclick="demoWrong()">Ver estado "Wrong"</button>
+      <button onclick="resetBoard()">Reset board</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-title">Fim de partida</div>
+    <div class="result-time">01:32.458</div>
+    <div class="result-grid">
+      <div class="result-card"><div class="label">Progresso</div><div class="value">5.3</div></div>
+      <div class="result-card"><div class="label">Distância</div><div class="value">7 níveis e 2r</div></div>
+      <div class="result-card"><div class="label">Recorde</div><div class="value">7.4</div></div>
+      <div class="result-card"><div class="label">Nível máx.</div><div class="value">12</div></div>
+    </div>
+    <button class="replay-btn" data-screen="home">Jogar novamente</button>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-sheet">
+      <h2>Como jogar</h2>
+      <ol>
+        <li>Os botões que <b>acendem</b> formam a sequência da rodada.</li>
+        <li>Memorize rápido — eles apagam sozinhos.</li>
+        <li>Clique nos botões certos, na ordem que quiser.</li>
+        <li>Clique em <b>Enviar</b> quando terminar.</li>
+        <li>Errou um botão? A partida acaba na hora.</li>
+      </ol>
+      <button class="modal-cta" id="modalCta">Entendi, vamos jogar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('click', () => {
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    themeToggle.textContent = isDark ? '🌙 Escuro' : '☀️ Claro';
+  });
+
+  // Navegação entre telas (apenas para fins de demonstração do mockup)
+  document.querySelectorAll('[data-screen]').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = el.getAttribute('data-screen');
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + target).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+      const navBtn = document.querySelector('.nav-btn[data-screen="' + target + '"]');
+      if (navBtn) navBtn.classList.add('active');
+    });
+  });
+
+  // Board: 12 botões de ação
+  const board = document.getElementById('board');
+  const TOTAL_BUTTONS = 12;
+  let selectedCount = 0;
+  let sequenceButtons = [];
+
+  for (let i = 0; i < TOTAL_BUTTONS; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'game-btn';
+    btn.dataset.index = i;
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('showing')) return;
+      btn.classList.toggle('selected');
+      selectedCount = document.querySelectorAll('.game-btn.selected').length;
+      updateSubmit();
+    });
+    board.appendChild(btn);
+  }
+
+  function updateSubmit() {
+    const submitBtn = document.getElementById('submitBtn');
+    if (sequenceButtons.length > 0 && selectedCount === sequenceButtons.length) {
+      submitBtn.classList.add('enabled');
+    } else {
+      submitBtn.classList.remove('enabled');
+    }
+  }
+
+  function resetBoard() {
+    document.querySelectorAll('.game-btn').forEach(b => {
+      b.classList.remove('showing', 'selected', 'wrong');
+    });
+    sequenceButtons = [];
+    selectedCount = 0;
+    updateSubmit();
+  }
+
+  function demoShowSequence(n) {
+    resetBoard();
+    const indices = Array.from({length: TOTAL_BUTTONS}, (_, i) => i);
+    indices.sort(() => Math.random() - 0.5);
+    sequenceButtons = indices.slice(0, n);
+    sequenceButtons.forEach(i => {
+      board.children[i].classList.add('showing');
+    });
+    const displayTime = Math.min(800 + n * 300, 4000);
+    setTimeout(() => {
+      sequenceButtons.forEach(i => board.children[i].classList.remove('showing'));
+    }, displayTime);
+  }
+
+  function demoWrong() {
+    const idleButtons = Array.from(document.querySelectorAll('.game-btn:not(.selected):not(.showing)'));
+    if (idleButtons.length === 0) return;
+    const target = idleButtons[Math.floor(Math.random() * idleButtons.length)];
+    target.classList.add('wrong');
+  }
+
+  // Modal
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  document.getElementById('openModalBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    modalBackdrop.classList.add('active');
+  });
+  document.getElementById('helpBtn').addEventListener('click', () => modalBackdrop.classList.add('active'));
+  document.getElementById('modalCta').addEventListener('click', () => modalBackdrop.classList.remove('active'));
+
+  let tutorialSeen = false;
+  function maybeShowTutorial() {
+    if (!tutorialSeen) {
+      modalBackdrop.classList.add('active');
+      tutorialSeen = true;
+    }
+  }
+</script>
+
+</body>
+</html>
