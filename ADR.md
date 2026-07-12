@@ -1,7 +1,7 @@
 # Architecture Decision Records (ADR) — FlashTap
 
 > Produto: FlashTap
-> Versão: 1.3
+> Versão: 1.4
 > Status: Aprovado para MVP
 
 ---
@@ -173,11 +173,33 @@ O GRS (seção 19) define o que é persistido (recorde, tempo, contagem de parti
 **Decisão:**
 - Schema de dados do LocalStorage validado com **Zod** no momento da leitura (`infrastructure` layer). Se o dado salvo não bater com o schema esperado (corrompido ou de versão antiga incompatível), o sistema descarta e trata como "sem recorde", nunca quebra a aplicação.
 - Chave de armazenamento **versionada no nome**: `flashtap:v1:record`. Uma mudança de schema incompatível no futuro sobe para `v2`, sem tentar migrar dado antigo — simplicidade sobre complexidade de migração, aceitável para dados client-side de baixo valor (apenas recorde local).
+- Duas chaves adicionais, mesmo padrão de versionamento: `flashtap:v1:preferences` (tema escolhido manualmente, se houver override do `prefers-color-scheme`) e `flashtap:v1:tutorial-seen` (flag booleana controlando se o modal "Como Jogar" já foi exibido — ver PRD RF-18).
 
 **Consequências:**
 - ✅ Elimina uma classe inteira de bugs "crash ao ler LocalStorage corrompido ou de versão antiga".
 - ✅ Fica documentado e testável (unit test simula LocalStorage corrompido/antigo e valida fallback gracioso).
-- ⚠️ Trade-off aceito: usuário perde recorde ao mudarmos de versão de schema — ok dado que é dado de baixo valor e sem persistência de conta/login.
+- ✅ Cada chave é independente e versionada isoladamente — perder o recorde por mudança de schema não afeta a preferência de tema nem a flag de tutorial, e vice-versa.
+- ⚠️ Trade-off aceito: usuário perde recorde/preferências ao mudarmos de versão de schema — ok dado que é dado de baixo valor e sem persistência de conta/login.
+
+---
+
+## ADR-012 — Theming: Ant Design ConfigProvider com detecção de `prefers-color-scheme`
+
+**Status:** Aceito
+
+**Contexto:**
+O produto passou a exigir suporte a tema claro e escuro (PRD RF-19, GRS seção 8 "Suporte a Tema Claro/Escuro"), com detecção automática da preferência do sistema e alternância manual pelo usuário.
+
+**Decisão:**
+- Usar o **`ConfigProvider`** do Ant Design com `theme.algorithm` alternando entre `theme.defaultAlgorithm` (claro) e `theme.darkAlgorithm` (escuro).
+- Detecção inicial via media query `prefers-color-scheme: dark`, lida uma única vez na montagem da aplicação (camada `presentation/theme`).
+- Override manual do usuário persistido em `flashtap:v1:preferences` (ADR-008); se presente, tem prioridade sobre a preferência do sistema.
+- Os design tokens de estado de botão (GRS seção 8: Idle, Showing, Selected, Wrong) são definidos como **duas variantes de paleta** (clara/escura) dentro de `presentation/theme`, nunca hardcoded dentro dos componentes de `presentation/components`.
+
+**Consequências:**
+- ✅ Nenhuma lib externa de theming necessária — o Ant Design já resolve a troca de algoritmo nativamente.
+- ✅ Centralizar as duas paletas em `presentation/theme` evita duplicação de cor espalhada pelos componentes e facilita auditoria de contraste (WCAG AA) exigida pelo GRS.
+- ⚠️ Componentes com cores customizadas fora do sistema de tokens do Ant Design (ex: estados do `GameButton`) precisam consumir o tema via contexto/hook, não via CSS estático — checklist a validar em code review.
 
 ---
 
@@ -239,7 +261,8 @@ src/
                           únicos que chamam hooks de application.
     components/         → Componentes Ant Design puros/presentational (Board, GameButton, Timer,
                           ReadyCountdown, ResultSummary) — só props, sem hooks de domínio.
-    theme/              → Design tokens (paleta do GRS seção 8) via ConfigProvider do Ant Design.
+    theme/              → Design tokens (paleta do GRS seção 8, variantes claro/escuro) via
+                          ConfigProvider do Ant Design; detecção de prefers-color-scheme.
     error-boundary/      → Error Boundary global + fallback de UI.
 
 .nvmrc                  → Versão de Node fixada
@@ -264,7 +287,8 @@ pnpm-lock.yaml           → Commitado, builds reprodutíveis
 | Deploy/Hospedagem | Next.js static export, Cloudflare Pages, preview automático por PR |
 | Observação de uso/comportamento | Microsoft Clarity (heatmap + gravação de sessão, gratuito e sem cap) |
 | Observabilidade | React Error Boundary + Sentry (free tier) |
-| Validação de dados persistidos | Zod, chave versionada (`flashtap:v1:record`) |
+| Validação de dados persistidos | Zod, chaves versionadas (`flashtap:v1:record`, `:preferences`, `:tutorial-seen`) |
+| Theming claro/escuro | Ant Design ConfigProvider (`defaultAlgorithm`/`darkAlgorithm`) + `prefers-color-scheme` |
 | Padrão de componente | Container/Presentational |
 | Node/dependências | `.nvmrc` + `engines`, pnpm-lock commitado, Dependabot, `pnpm audit` em CI |
 | CI | GitHub Actions: lint → typecheck → unit+component → mutation (PRs em `domain/`) → E2E → deploy |
