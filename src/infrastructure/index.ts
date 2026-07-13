@@ -1,1 +1,1 @@
-export {};
+export { readTutorialSeen, writeTutorialSeen } from "./tutorialFlag";

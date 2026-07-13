@@ -8,6 +8,9 @@ test("app carrega e exibe a Home", async ({ page }) => {
 });
 
 test("botão Jogar navega para a tela de Jogo", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("flashtap:v1:tutorial-seen", "true");
+  });
   await page.goto("/");
   await page.getByRole("link", { name: "Jogar" }).click();
   await expect(page).toHaveURL(/\/jogo$/);
