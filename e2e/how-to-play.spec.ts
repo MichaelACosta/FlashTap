@@ -22,3 +22,19 @@ test("não exibe o modal quando a flag já está marcada como vista", async ({ p
   await page.goto("/");
   await expect(page.getByRole("dialog")).not.toBeVisible();
 });
+
+test("ícone de ajuda na tela de Jogo reabre o modal independente da flag (US-04)", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("flashtap:v1:tutorial-seen", "true");
+  });
+  await page.goto("/jogo");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+
+  await page.getByRole("button", { name: "Como jogar" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+
+  await page.getByRole("button", { name: "Entendi" }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+});
