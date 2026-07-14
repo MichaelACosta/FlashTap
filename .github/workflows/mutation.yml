@@ -1,0 +1,34 @@
+name: Mutation testing (domain)
+
+# Restrito à camada domain (ADR-003): StrykerJS é lento, então roda apenas
+# quando um PR muda src/domain/** e nunca bloqueia o merge.
+on:
+  pull_request:
+    paths:
+      - "src/domain/**"
+
+jobs:
+  stryker:
+    name: Stryker
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test:mutation
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stryker-report
+          path: reports/
+          retention-days: 7

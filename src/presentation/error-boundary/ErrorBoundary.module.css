@@ -1,0 +1,22 @@
+.fallback {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px 28px;
+  text-align: center;
+  color: var(--text);
+}
+
+.reload {
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--brand);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}

@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.setItem("flashtap:v1:tutorial-seen", "true");
+    window.localStorage.setItem("flashtap:v1:consent", JSON.stringify("declined"));
   });
 });
 
@@ -67,6 +68,8 @@ test("clicar em um botão errado encerra a partida e mostra a tela de Game Over 
   await page.getByRole("button", { name: `Botão ${wrongId}`, exact: true }).click();
 
   await expect(page.getByRole("button", { name: `Botão ${wrongId}, incorreto` })).toBeDisabled();
-  await expect(page.getByRole("region", { name: "Fim de partida" })).toBeVisible();
-  await expect(page.getByText("1.1")).toBeVisible();
+  const result = page.getByRole("region", { name: "Fim de partida" });
+  await expect(result).toBeVisible();
+  // Progresso e Recorde (US-17) mostram o mesmo valor "1.1" na primeira derrota.
+  await expect(result.getByText("1.1")).toHaveCount(2);
 });

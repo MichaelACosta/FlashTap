@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ThemeProvider } from "@/presentation/theme";
+import { ErrorBoundary } from "@/presentation/error-boundary";
+import { AnalyticsGate } from "@/presentation/analytics";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -23,7 +25,10 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetBrainsMono.variable}`}>
         <AntdRegistry>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <ErrorBoundary>{children}</ErrorBoundary>
+            <AnalyticsGate />
+          </ThemeProvider>
         </AntdRegistry>
       </body>
     </html>

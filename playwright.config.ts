@@ -1,6 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const CHROMIUM_EXECUTABLE_PATH = "/opt/pw-browsers/chromium";
+// Only set in sandboxed dev environments with a pre-installed browser at a
+// fixed path; on CI/other machines, Playwright resolves its own installed
+// browser (via `playwright install`), so this stays undefined there.
+const CHROMIUM_EXECUTABLE_PATH = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -20,14 +23,18 @@ export default defineConfig({
       name: "mobile",
       use: {
         ...devices["Pixel 7"],
-        launchOptions: { executablePath: CHROMIUM_EXECUTABLE_PATH },
+        launchOptions: CHROMIUM_EXECUTABLE_PATH
+          ? { executablePath: CHROMIUM_EXECUTABLE_PATH }
+          : undefined,
       },
     },
     {
       name: "desktop",
       use: {
         ...devices["Desktop Chrome"],
-        launchOptions: { executablePath: CHROMIUM_EXECUTABLE_PATH },
+        launchOptions: CHROMIUM_EXECUTABLE_PATH
+          ? { executablePath: CHROMIUM_EXECUTABLE_PATH }
+          : undefined,
       },
     },
   ],
