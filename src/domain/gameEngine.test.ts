@@ -62,12 +62,15 @@ describe("gameReducer invalid transitions are no-ops (GRS §22)", () => {
     "gameOver",
     "victory",
   ];
+  // RESET_GAME is valid from two statuses (gameOver and victory), so it doesn't
+  // fit this single-valid-status matrix; it has its own describe block below.
   const validFrom: Record<GameAction["type"], GameStatus> = {
     START_GAME: "idle",
     READY_COUNTDOWN_DONE: "ready",
     SEQUENCE_SHOWN: "showingSequence",
     SELECT_BUTTON: "waitingInput",
     SUBMIT_ROUND_SUCCESS: "waitingInput",
+    RESET_GAME: "gameOver",
   };
   const actions: GameAction[] = [
     { type: "START_GAME" },
@@ -213,6 +216,40 @@ describe("gameReducer SUBMIT_ROUND_SUCCESS (GRS §14/§15)", () => {
 
     expect(gameReducer(state, { type: "SUBMIT_ROUND_SUCCESS" })).toEqual(state);
   });
+});
+
+describe("gameReducer RESET_GAME (US-16)", () => {
+  it.each<GameStatus>(["gameOver", "victory"])(
+    "resets to the initial state when dispatched from %s",
+    (status) => {
+      const state: GameEngineState = {
+        status,
+        level: 7,
+        round: 3,
+        sequence: [1, 2, 3],
+        selectedIds: [1, 2],
+        wrongButtonId: status === "gameOver" ? 9 : null,
+      };
+
+      expect(gameReducer(state, { type: "RESET_GAME" })).toEqual(createInitialGameState());
+    },
+  );
+
+  it.each<GameStatus>(["idle", "ready", "showingSequence", "waitingInput"])(
+    "ignores RESET_GAME dispatched from %s (match still in progress)",
+    (status) => {
+      const state: GameEngineState = {
+        status,
+        level: 4,
+        round: 2,
+        sequence: [1, 2],
+        selectedIds: [],
+        wrongButtonId: null,
+      };
+
+      expect(gameReducer(state, { type: "RESET_GAME" })).toEqual(state);
+    },
+  );
 });
 
 describe("getButtonVisualState", () => {

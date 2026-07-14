@@ -1,16 +1,38 @@
 import styles from "./ResultSummary.module.css";
 
+export type ResultOutcome = "gameOver" | "victory";
+
 type ResultSummaryProps = {
+  outcome: ResultOutcome;
   progress: string;
   distance: string;
   tempo: string | null;
   record: string | null;
+  onPlayAgain: () => void;
 };
 
-export function ResultSummary({ progress, distance, tempo, record }: ResultSummaryProps) {
+const TITLES: Record<ResultOutcome, string> = {
+  gameOver: "Fim de partida",
+  victory: "Vitória!",
+};
+
+export function ResultSummary({
+  outcome,
+  progress,
+  distance,
+  tempo,
+  record,
+  onPlayAgain,
+}: ResultSummaryProps) {
+  const title = TITLES[outcome];
+
   return (
-    <div className={styles.panel} role="region" aria-label="Fim de partida">
-      <p className={styles.title}>Fim de partida</p>
+    <div
+      className={`${styles.panel} ${outcome === "victory" ? styles.victory : styles.gameOver}`}
+      role="region"
+      aria-label={title}
+    >
+      <p className={styles.title}>{title}</p>
       <dl className={styles.grid}>
         <div className={styles.field}>
           <dt className={styles.label}>Progresso</dt>
@@ -29,6 +51,9 @@ export function ResultSummary({ progress, distance, tempo, record }: ResultSumma
           <dd className={styles.value}>{record ?? "—"}</dd>
         </div>
       </dl>
+      <button type="button" className={styles.playAgain} onClick={onPlayAgain}>
+        Jogar novamente
+      </button>
     </div>
   );
 }

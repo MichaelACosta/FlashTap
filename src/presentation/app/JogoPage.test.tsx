@@ -2,11 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { JogoPage } from "./JogoPage";
 
-const { useGameEngineMock, useLocalRecordMock, startGame, selectButton, submitRound } =
+const { useGameEngineMock, useLocalRecordMock, startGame, selectButton, submitRound, resetGame } =
   vi.hoisted(() => ({
     startGame: vi.fn(),
     selectButton: vi.fn(),
     submitRound: vi.fn(),
+    resetGame: vi.fn(),
     useGameEngineMock: vi.fn(),
     useLocalRecordMock: vi.fn(),
   }));
@@ -38,6 +39,7 @@ function baseGameEngine(overrides: Record<string, unknown> = {}) {
     progress: "1.1",
     distance: "11 níveis e 4 rodadas",
     tempo: "00:00",
+    resetGame,
     ...overrides,
   };
 }
@@ -46,6 +48,7 @@ beforeEach(() => {
   startGame.mockClear();
   selectButton.mockClear();
   submitRound.mockClear();
+  resetGame.mockClear();
   useGameEngineMock.mockReturnValue(baseGameEngine());
   useLocalRecordMock.mockReturnValue({ record: null });
 });
@@ -173,6 +176,15 @@ describe("JogoPage", () => {
     });
   });
 
+  it("calls resetGame when 'Jogar novamente' is clicked after a game over (US-16)", () => {
+    useGameEngineMock.mockReturnValue(baseGameEngine({ status: "gameOver" }));
+
+    render(<JogoPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Jogar novamente" }));
+
+    expect(resetGame).toHaveBeenCalledTimes(1);
+  });
+
   it("shows the result summary and disables the whole board on victory, without an Enviar button (US-12)", () => {
     useLocalRecordMock.mockReturnValue({ record: "10.3" });
     useGameEngineMock.mockReturnValue(
@@ -190,7 +202,7 @@ describe("JogoPage", () => {
 
     render(<JogoPage />);
 
-    expect(screen.getByRole("region", { name: "Fim de partida" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Vitória!" })).toBeInTheDocument();
     expect(screen.getByText("12.5")).toBeInTheDocument();
     expect(screen.getByText("Concluído")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Enviar" })).not.toBeInTheDocument();

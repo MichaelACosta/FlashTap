@@ -8,10 +8,38 @@
   padding: 20px;
 }
 
+.gameOver {
+  border-color: var(--btn-wrong-border);
+}
+
+.victory {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
 .title {
   font-weight: 700;
   font-size: 18px;
   text-align: center;
+}
+
+.victory .title {
+  color: var(--brand);
+}
+
+.playAgain {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--brand);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
 }
 
 .grid {
