@@ -10,12 +10,10 @@
   padding: 16px 20px;
 }
 
-.placeholder {
+.main {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 40px 28px;
-  color: var(--text-secondary);
+  padding: 20px 28px 40px;
 }

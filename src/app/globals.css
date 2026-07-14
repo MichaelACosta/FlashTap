@@ -10,6 +10,13 @@
   --radius-lg: 28px;
   --radius-md: 18px;
   --shadow: 0 8px 24px rgba(23, 26, 36, 0.08);
+  --btn-idle-bg: #e3e0ec;
+  --btn-idle-border: #c7c2d9;
+  --btn-idle-text: #171a24;
+  --btn-showing-bg: #ff8a3d;
+  --btn-showing-border: #e8650f;
+  --btn-showing-text: #171a24;
+  --btn-showing-glow: rgba(255, 138, 61, 0.55);
 }
 
 [data-theme="dark"] {
@@ -20,6 +27,25 @@
   --text-secondary: #9aa3b2;
   --border: #2a2f3d;
   --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --btn-idle-bg: #262238;
+  --btn-idle-border: #3d3856;
+  --btn-idle-text: #f5f7fa;
+  --btn-showing-bg: #ffa94d;
+  --btn-showing-border: #ffc98a;
+  --btn-showing-text: #171a24;
+  --btn-showing-glow: rgba(255, 169, 77, 0.5);
+}
+
+@keyframes game-button-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--btn-showing-glow);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px var(--btn-showing-glow);
+    transform: scale(1.05);
+  }
 }
 
 html {

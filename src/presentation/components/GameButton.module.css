@@ -1,0 +1,41 @@
+.button {
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: var(--radius-md);
+  font-family: var(--font-jetbrains-mono);
+  font-weight: 700;
+  font-size: 20px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.button:disabled {
+  cursor: default;
+}
+
+.idle {
+  background: var(--btn-idle-bg);
+  border: 1px solid var(--btn-idle-border);
+  color: var(--btn-idle-text);
+}
+
+.showing {
+  background: var(--btn-showing-bg);
+  border: 1px solid var(--btn-showing-border);
+  color: var(--btn-showing-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .showing {
+    animation: game-button-glow-pulse 0.6s ease-in-out infinite;
+  }
+}
+
+.selected {
+}
+
+.wrong {
+}

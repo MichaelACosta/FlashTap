@@ -2,3 +2,6 @@ export { useLocalRecord } from "./useLocalRecord";
 export type { UseLocalRecordResult } from "./useLocalRecord";
 export { useTutorialFlag } from "./useTutorialFlag";
 export type { UseTutorialFlagResult } from "./useTutorialFlag";
+export { useGameEngine } from "./useGameEngine";
+export type { BoardButtonViewModel, UseGameEngineResult } from "./useGameEngine";
+export type { ButtonVisualState } from "@/domain";

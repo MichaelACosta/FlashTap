@@ -2,3 +2,6 @@ export { Logo } from "./Logo";
 export { RecordChip } from "./RecordChip";
 export { HowToPlayModal } from "./HowToPlayModal";
 export { HelpButton } from "./HelpButton";
+export { GameButton } from "./GameButton";
+export { Board } from "./Board";
+export { ReadyCountdown } from "./ReadyCountdown";
