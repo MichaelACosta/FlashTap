@@ -144,6 +144,31 @@ describe("useGameEngine", () => {
       expect(result.current.status).toBe("waitingInput");
       expect(result.current.progress).toBe("1.1");
     });
+
+    it("resetGame does nothing while a match is in progress (US-16)", () => {
+      const { result } = renderHook(() => useGameEngine());
+      const correctId = reachWaitingInput(result);
+      act(() => result.current.selectButton(correctId));
+
+      act(() => result.current.resetGame());
+
+      expect(result.current.status).toBe("waitingInput");
+    });
+
+    it("resetGame returns to idle and zeroes level/round/tempo after a game over (US-16)", () => {
+      const { result } = renderHook(() => useGameEngine());
+      const correctId = reachWaitingInput(result);
+      const wrongId = result.current.board.find((b) => b.id !== correctId)!.id;
+      act(() => result.current.selectButton(wrongId));
+      expect(result.current.status).toBe("gameOver");
+
+      act(() => vi.advanceTimersByTime(500));
+      act(() => result.current.resetGame());
+
+      expect(result.current.status).toBe("idle");
+      expect(result.current.progress).toBe("1.1");
+      expect(result.current.tempo).toBe("00:00");
+    });
   });
 
   describe("full match progression (level always 1 button, deterministic single-button sequences)", () => {

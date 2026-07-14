@@ -37,11 +37,12 @@ export type UseGameEngineResult = {
   progress: string;
   distance: string;
   tempo: string;
+  resetGame: () => void;
 };
 
 export function useGameEngine(): UseGameEngineResult {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialGameState);
-  const { elapsedMs } = useGameTimer(state.status);
+  const { elapsedMs, reset: resetTimer } = useGameTimer(state.status);
 
   useEffect(() => {
     if (state.status !== "ready") return;
@@ -76,6 +77,11 @@ export function useGameEngine(): UseGameEngineResult {
     dispatch({ type: "SUBMIT_ROUND_SUCCESS" });
   }, []);
 
+  const resetGame = useCallback(() => {
+    dispatch({ type: "RESET_GAME" });
+    resetTimer();
+  }, [resetTimer]);
+
   const board = useMemo<BoardButtonViewModel[]>(() => {
     const interactive = canInteract(state);
     return Array.from({ length: BOARD_SIZE }, (_, index) => {
@@ -98,5 +104,6 @@ export function useGameEngine(): UseGameEngineResult {
     progress: formatProgress(state.level, state.round),
     distance: computeDistance(state.level, state.round),
     tempo: formatElapsedTime(elapsedMs),
+    resetGame,
   };
 }

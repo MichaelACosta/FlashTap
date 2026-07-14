@@ -25,7 +25,8 @@ export type GameAction =
   | { type: "READY_COUNTDOWN_DONE" }
   | { type: "SEQUENCE_SHOWN" }
   | { type: "SELECT_BUTTON"; buttonId: ButtonId }
-  | { type: "SUBMIT_ROUND_SUCCESS" };
+  | { type: "SUBMIT_ROUND_SUCCESS" }
+  | { type: "RESET_GAME" };
 
 export function createInitialGameState(): GameEngineState {
   return {
@@ -91,6 +92,10 @@ export function gameReducer(state: GameEngineState, action: GameAction): GameEng
       }
 
       return { ...state, status: "victory" };
+    }
+    case "RESET_GAME": {
+      if (state.status !== "gameOver" && state.status !== "victory") return state;
+      return createInitialGameState();
     }
     default:
       return state;
