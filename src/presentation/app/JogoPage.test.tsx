@@ -37,6 +37,7 @@ function baseGameEngine(overrides: Record<string, unknown> = {}) {
     isSubmitEnabled: false,
     progress: "1.1",
     distance: "11 níveis e 4 rodadas",
+    tempo: "00:00",
     ...overrides,
   };
 }
@@ -196,6 +197,18 @@ describe("JogoPage", () => {
     screen.getAllByRole("button", { name: /^Botão/ }).forEach((button) => {
       expect(button).toBeDisabled();
     });
+  });
+
+  it("shows the running timer while the board is visible and passes it through to the result summary (US-13)", () => {
+    useLocalRecordMock.mockReturnValue({ record: "3.2" });
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({ status: "gameOver", tempo: "00:42" }),
+    );
+
+    render(<JogoPage />);
+
+    expect(screen.getByRole("timer", { name: "Tempo decorrido" })).toHaveTextContent("00:42");
+    expect(screen.getAllByText("00:42")).toHaveLength(2);
   });
 
   it("opens the How To Play modal when the help button is clicked (US-04)", () => {

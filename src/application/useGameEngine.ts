@@ -5,6 +5,7 @@ import {
   computeDistance,
   computeExhibitionDurationMs,
   createInitialGameState,
+  formatElapsedTime,
   formatProgress,
   gameReducer,
   getButtonVisualState,
@@ -15,6 +16,7 @@ import {
   type ButtonVisualState,
   type GameStatus,
 } from "@/domain";
+import { useGameTimer } from "./useGameTimer";
 
 export type BoardButtonViewModel = {
   id: number;
@@ -34,10 +36,12 @@ export type UseGameEngineResult = {
   isSubmitEnabled: boolean;
   progress: string;
   distance: string;
+  tempo: string;
 };
 
 export function useGameEngine(): UseGameEngineResult {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialGameState);
+  const { elapsedMs } = useGameTimer(state.status);
 
   useEffect(() => {
     if (state.status !== "ready") return;
@@ -93,5 +97,6 @@ export function useGameEngine(): UseGameEngineResult {
     isSubmitEnabled: isSubmitEnabled(state),
     progress: formatProgress(state.level, state.round),
     distance: computeDistance(state.level, state.round),
+    tempo: formatElapsedTime(elapsedMs),
   };
 }

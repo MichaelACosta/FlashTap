@@ -9,6 +9,7 @@ import {
   ReadyCountdown,
   ResultSummary,
   SubmitButton,
+  Timer,
 } from "@/presentation/components";
 import styles from "./JogoPage.module.css";
 
@@ -24,6 +25,7 @@ export function JogoPage() {
     isSubmitEnabled,
     progress,
     distance,
+    tempo,
   } = useGameEngine();
   const { record } = useLocalRecord();
 
@@ -47,6 +49,7 @@ export function JogoPage() {
         {status === "ready" && <ReadyCountdown durationMs={readyCountdownMs} />}
         {showBoard && (
           <div className={styles.gameArea}>
+            <Timer tempo={tempo} />
             <Board
               buttons={board}
               onButtonClick={status === "waitingInput" ? selectButton : undefined}
@@ -55,9 +58,8 @@ export function JogoPage() {
               <SubmitButton disabled={!isSubmitEnabled} onClick={submitRound} />
             )}
             {showResult && (
-              // TODO(US-13): pass the real elapsed time once useGameTimer exists.
               // TODO(US-15): distinct visual treatment for victory vs. game over.
-              <ResultSummary progress={progress} distance={distance} tempo={null} record={record} />
+              <ResultSummary progress={progress} distance={distance} tempo={tempo} record={record} />
             )}
           </div>
         )}
