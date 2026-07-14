@@ -3,6 +3,8 @@ export type { ButtonId } from "./sequence";
 export { computeExhibitionDurationMs, READY_COUNTDOWN_MS } from "./exhibition";
 export { computeDistance, formatProgress, ROUNDS_PER_LEVEL, TOTAL_LEVELS } from "./distance";
 export { formatElapsedTime } from "./time";
+export { isNewRecord } from "./record";
+export type { LocalRecord } from "./record";
 export {
   canInteract,
   createInitialGameState,

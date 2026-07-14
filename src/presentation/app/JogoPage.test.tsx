@@ -2,15 +2,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { JogoPage } from "./JogoPage";
 
-const { useGameEngineMock, useLocalRecordMock, startGame, selectButton, submitRound, resetGame } =
-  vi.hoisted(() => ({
-    startGame: vi.fn(),
-    selectButton: vi.fn(),
-    submitRound: vi.fn(),
-    resetGame: vi.fn(),
-    useGameEngineMock: vi.fn(),
-    useLocalRecordMock: vi.fn(),
-  }));
+const {
+  useGameEngineMock,
+  useLocalRecordMock,
+  startGame,
+  selectButton,
+  submitRound,
+  resetGame,
+  maybeUpdateRecord,
+} = vi.hoisted(() => ({
+  startGame: vi.fn(),
+  selectButton: vi.fn(),
+  submitRound: vi.fn(),
+  resetGame: vi.fn(),
+  maybeUpdateRecord: vi.fn(),
+  useGameEngineMock: vi.fn(),
+  useLocalRecordMock: vi.fn(),
+}));
 
 vi.mock("@/application", () => ({
   useGameEngine: useGameEngineMock,
@@ -39,6 +47,7 @@ function baseGameEngine(overrides: Record<string, unknown> = {}) {
     progress: "1.1",
     distance: "11 níveis e 4 rodadas",
     tempo: "00:00",
+    tempoMs: 0,
     resetGame,
     ...overrides,
   };
@@ -49,8 +58,9 @@ beforeEach(() => {
   selectButton.mockClear();
   submitRound.mockClear();
   resetGame.mockClear();
+  maybeUpdateRecord.mockClear();
   useGameEngineMock.mockReturnValue(baseGameEngine());
-  useLocalRecordMock.mockReturnValue({ record: null });
+  useLocalRecordMock.mockReturnValue({ record: null, maybeUpdateRecord });
 });
 
 describe("JogoPage", () => {
@@ -155,7 +165,7 @@ describe("JogoPage", () => {
   });
 
   it("shows the result summary and disables the whole board on gameOver, without an Enviar button (US-08)", () => {
-    useLocalRecordMock.mockReturnValue({ record: "3.2" });
+    useLocalRecordMock.mockReturnValue({ record: "3.2", maybeUpdateRecord });
     useGameEngineMock.mockReturnValue(
       baseGameEngine({
         status: "gameOver",
@@ -176,6 +186,34 @@ describe("JogoPage", () => {
     });
   });
 
+  it("reports the match result to maybeUpdateRecord on game over (US-17)", () => {
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({ status: "gameOver", level: 4, round: 2, tempoMs: 15_500 }),
+    );
+
+    render(<JogoPage />);
+
+    expect(maybeUpdateRecord).toHaveBeenCalledWith(4, 2, 15_500);
+  });
+
+  it("reports the match result to maybeUpdateRecord on victory (US-17)", () => {
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({ status: "victory", level: 12, round: 5, tempoMs: 240_000 }),
+    );
+
+    render(<JogoPage />);
+
+    expect(maybeUpdateRecord).toHaveBeenCalledWith(12, 5, 240_000);
+  });
+
+  it("does not report a result while a match is still in progress", () => {
+    useGameEngineMock.mockReturnValue(baseGameEngine({ status: "waitingInput" }));
+
+    render(<JogoPage />);
+
+    expect(maybeUpdateRecord).not.toHaveBeenCalled();
+  });
+
   it("calls resetGame when 'Jogar novamente' is clicked after a game over (US-16)", () => {
     useGameEngineMock.mockReturnValue(baseGameEngine({ status: "gameOver" }));
 
@@ -186,7 +224,7 @@ describe("JogoPage", () => {
   });
 
   it("shows the result summary and disables the whole board on victory, without an Enviar button (US-12)", () => {
-    useLocalRecordMock.mockReturnValue({ record: "10.3" });
+    useLocalRecordMock.mockReturnValue({ record: "10.3", maybeUpdateRecord });
     useGameEngineMock.mockReturnValue(
       baseGameEngine({
         status: "victory",
@@ -212,7 +250,7 @@ describe("JogoPage", () => {
   });
 
   it("shows the running timer while the board is visible and passes it through to the result summary (US-13)", () => {
-    useLocalRecordMock.mockReturnValue({ record: "3.2" });
+    useLocalRecordMock.mockReturnValue({ record: "3.2", maybeUpdateRecord });
     useGameEngineMock.mockReturnValue(
       baseGameEngine({ status: "gameOver", tempo: "00:42" }),
     );

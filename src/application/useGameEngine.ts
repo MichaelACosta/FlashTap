@@ -37,6 +37,7 @@ export type UseGameEngineResult = {
   progress: string;
   distance: string;
   tempo: string;
+  tempoMs: number;
   resetGame: () => void;
 };
 
@@ -104,6 +105,7 @@ export function useGameEngine(): UseGameEngineResult {
     progress: formatProgress(state.level, state.round),
     distance: computeDistance(state.level, state.round),
     tempo: formatElapsedTime(elapsedMs),
+    tempoMs: elapsedMs,
     resetGame,
   };
 }
