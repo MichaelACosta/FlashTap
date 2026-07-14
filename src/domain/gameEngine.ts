@@ -1,8 +1,15 @@
+import { ROUNDS_PER_LEVEL, TOTAL_LEVELS } from "./distance";
 import { BOARD_SIZE, drawSequence, getSequenceLength, type ButtonId } from "./sequence";
 
 export type ButtonVisualState = "idle" | "showing" | "selected" | "wrong";
 
-export type GameStatus = "idle" | "ready" | "showingSequence" | "waitingInput" | "gameOver";
+export type GameStatus =
+  | "idle"
+  | "ready"
+  | "showingSequence"
+  | "waitingInput"
+  | "gameOver"
+  | "victory";
 
 export type GameEngineState = {
   status: GameStatus;
@@ -17,7 +24,8 @@ export type GameAction =
   | { type: "START_GAME" }
   | { type: "READY_COUNTDOWN_DONE" }
   | { type: "SEQUENCE_SHOWN" }
-  | { type: "SELECT_BUTTON"; buttonId: ButtonId };
+  | { type: "SELECT_BUTTON"; buttonId: ButtonId }
+  | { type: "SUBMIT_ROUND_SUCCESS" };
 
 export function createInitialGameState(): GameEngineState {
   return {
@@ -55,6 +63,34 @@ export function gameReducer(state: GameEngineState, action: GameAction): GameEng
         return { ...state, status: "gameOver", wrongButtonId: action.buttonId };
       }
       return { ...state, selectedIds: [...state.selectedIds, action.buttonId] };
+    }
+    case "SUBMIT_ROUND_SUCCESS": {
+      if (!isSubmitEnabled(state)) return state;
+
+      if (state.round < ROUNDS_PER_LEVEL) {
+        const round = state.round + 1;
+        return {
+          ...state,
+          status: "showingSequence",
+          round,
+          sequence: drawSequence(getSequenceLength(state.level), BOARD_SIZE),
+          selectedIds: [],
+        };
+      }
+
+      if (state.level < TOTAL_LEVELS) {
+        const level = state.level + 1;
+        return {
+          ...state,
+          status: "showingSequence",
+          level,
+          round: 1,
+          sequence: drawSequence(getSequenceLength(level), BOARD_SIZE),
+          selectedIds: [],
+        };
+      }
+
+      return { ...state, status: "victory" };
     }
     default:
       return state;

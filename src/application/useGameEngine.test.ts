@@ -118,5 +118,56 @@ describe("useGameEngine", () => {
       result.current.board.forEach((button) => expect(button.disabled).toBe(true));
       expect(result.current.isSubmitEnabled).toBe(false);
     });
+
+    it("advances to round 1.2 on submitRound, skipping the ready countdown (GRS §14/§20)", () => {
+      const { result } = renderHook(() => useGameEngine());
+      const correctId = reachWaitingInput(result);
+
+      act(() => result.current.selectButton(correctId));
+      act(() => result.current.submitRound());
+
+      expect(result.current.status).toBe("showingSequence");
+      expect(result.current.progress).toBe("1.2");
+
+      act(() => vi.advanceTimersByTime(1100));
+
+      expect(result.current.status).toBe("waitingInput");
+      expect(result.current.isSubmitEnabled).toBe(false);
+    });
+
+    it("does nothing when submitRound is called before the selection is complete", () => {
+      const { result } = renderHook(() => useGameEngine());
+      reachWaitingInput(result);
+
+      act(() => result.current.submitRound());
+
+      expect(result.current.status).toBe("waitingInput");
+      expect(result.current.progress).toBe("1.1");
+    });
+  });
+
+  describe("full match progression (level always 1 button, deterministic single-button sequences)", () => {
+    function completeRound(result: { current: ReturnType<typeof useGameEngine> }) {
+      const correctId = result.current.board.find((b) => b.state === "showing")!.id;
+      act(() => vi.advanceTimersByTime(1100));
+      act(() => result.current.selectButton(correctId));
+      act(() => result.current.submitRound());
+    }
+
+    it("advances level to 2 after completing the 5 rounds of level 1 (GRS §14)", () => {
+      const { result } = renderHook(() => useGameEngine());
+
+      act(() => result.current.startGame());
+      act(() => vi.advanceTimersByTime(1500));
+
+      for (let round = 1; round <= 4; round++) {
+        completeRound(result);
+        expect(result.current.progress).toBe(`1.${round + 1}`);
+      }
+      completeRound(result);
+
+      expect(result.current.progress).toBe("2.1");
+      expect(result.current.status).toBe("showingSequence");
+    });
   });
 });

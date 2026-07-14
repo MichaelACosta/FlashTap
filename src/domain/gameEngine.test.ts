@@ -54,18 +54,27 @@ describe("gameReducer happy path (GRS §20)", () => {
 });
 
 describe("gameReducer invalid transitions are no-ops (GRS §22)", () => {
-  const statuses: GameStatus[] = ["idle", "ready", "showingSequence", "waitingInput", "gameOver"];
+  const statuses: GameStatus[] = [
+    "idle",
+    "ready",
+    "showingSequence",
+    "waitingInput",
+    "gameOver",
+    "victory",
+  ];
   const validFrom: Record<GameAction["type"], GameStatus> = {
     START_GAME: "idle",
     READY_COUNTDOWN_DONE: "ready",
     SEQUENCE_SHOWN: "showingSequence",
     SELECT_BUTTON: "waitingInput",
+    SUBMIT_ROUND_SUCCESS: "waitingInput",
   };
   const actions: GameAction[] = [
     { type: "START_GAME" },
     { type: "READY_COUNTDOWN_DONE" },
     { type: "SEQUENCE_SHOWN" },
     { type: "SELECT_BUTTON", buttonId: 1 },
+    { type: "SUBMIT_ROUND_SUCCESS" },
   ];
 
   actions.forEach((action) => {
@@ -128,6 +137,81 @@ describe("gameReducer SELECT_BUTTON from waitingInput (GRS §10/§11)", () => {
     expect(next.status).toBe("gameOver");
     expect(next.wrongButtonId).toBe(9);
     expect(next.selectedIds).toEqual([3]);
+  });
+});
+
+describe("gameReducer SUBMIT_ROUND_SUCCESS (GRS §14/§15)", () => {
+  it("advances to the next round within the same level when round < 5", () => {
+    const state: GameEngineState = {
+      status: "waitingInput",
+      level: 3,
+      round: 2,
+      sequence: [1, 2, 3],
+      selectedIds: [1, 2, 3],
+      wrongButtonId: null,
+    };
+
+    const next = gameReducer(state, { type: "SUBMIT_ROUND_SUCCESS" });
+
+    expect(next.status).toBe("showingSequence");
+    expect(next.level).toBe(3);
+    expect(next.round).toBe(3);
+    expect(next.selectedIds).toEqual([]);
+    expect(next.sequence).toHaveLength(3);
+    expect(new Set(next.sequence).size).toBe(3);
+  });
+
+  it("advances to the next level, resetting round to 1, when round 5 completes and level < 12", () => {
+    const state: GameEngineState = {
+      status: "waitingInput",
+      level: 3,
+      round: 5,
+      sequence: [1, 2, 3],
+      selectedIds: [1, 2, 3],
+      wrongButtonId: null,
+    };
+
+    const next = gameReducer(state, { type: "SUBMIT_ROUND_SUCCESS" });
+
+    expect(next.status).toBe("showingSequence");
+    expect(next.level).toBe(4);
+    expect(next.round).toBe(1);
+    expect(next.selectedIds).toEqual([]);
+    expect(next.sequence).toHaveLength(4);
+    expect(new Set(next.sequence).size).toBe(4);
+  });
+
+  it("wins the game when round 5 of level 12 completes (GRS §15)", () => {
+    const sequence = Array.from({ length: 12 }, (_, i) => i + 1);
+    const state: GameEngineState = {
+      status: "waitingInput",
+      level: 12,
+      round: 5,
+      sequence,
+      selectedIds: sequence,
+      wrongButtonId: null,
+    };
+
+    const next = gameReducer(state, { type: "SUBMIT_ROUND_SUCCESS" });
+
+    expect(next.status).toBe("victory");
+    expect(next.level).toBe(12);
+    expect(next.round).toBe(5);
+    expect(next.sequence).toEqual(sequence);
+    expect(next.selectedIds).toEqual(sequence);
+  });
+
+  it("is a no-op when the selection does not yet match the sequence (GRS §13)", () => {
+    const state: GameEngineState = {
+      status: "waitingInput",
+      level: 3,
+      round: 2,
+      sequence: [1, 2, 3],
+      selectedIds: [1, 2],
+      wrongButtonId: null,
+    };
+
+    expect(gameReducer(state, { type: "SUBMIT_ROUND_SUCCESS" })).toEqual(state);
   });
 });
 
@@ -195,7 +279,7 @@ describe("getButtonVisualState", () => {
 });
 
 describe("canInteract", () => {
-  it.each<GameStatus>(["idle", "ready", "showingSequence", "gameOver"])(
+  it.each<GameStatus>(["idle", "ready", "showingSequence", "gameOver", "victory"])(
     "returns false when status is %s",
     (status) => {
       expect(
@@ -255,16 +339,19 @@ describe("isSubmitEnabled", () => {
     },
   );
 
-  it("is false outside waitingInput even when selection length matches the sequence", () => {
-    const state: GameEngineState = {
-      status: "gameOver",
-      level: 1,
-      round: 1,
-      sequence: [3],
-      selectedIds: [3],
-      wrongButtonId: 9,
-    };
+  it.each<GameStatus>(["gameOver", "victory"])(
+    "is false outside waitingInput (status %s) even when selection length matches the sequence",
+    (status) => {
+      const state: GameEngineState = {
+        status,
+        level: 1,
+        round: 1,
+        sequence: [3],
+        selectedIds: [3],
+        wrongButtonId: status === "gameOver" ? 9 : null,
+      };
 
-    expect(isSubmitEnabled(state)).toBe(false);
-  });
+      expect(isSubmitEnabled(state)).toBe(false);
+    },
+  );
 });
