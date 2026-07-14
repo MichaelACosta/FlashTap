@@ -26,12 +26,13 @@ export function JogoPage() {
     progress,
     distance,
     tempo,
+    resetGame,
   } = useGameEngine();
   const { record } = useLocalRecord();
 
   useEffect(() => {
-    startGame();
-  }, [startGame]);
+    if (status === "idle") startGame();
+  }, [status, startGame]);
 
   const showBoard =
     status === "showingSequence" ||
@@ -58,8 +59,14 @@ export function JogoPage() {
               <SubmitButton disabled={!isSubmitEnabled} onClick={submitRound} />
             )}
             {showResult && (
-              // TODO(US-15): distinct visual treatment for victory vs. game over.
-              <ResultSummary progress={progress} distance={distance} tempo={tempo} record={record} />
+              <ResultSummary
+                outcome={status === "victory" ? "victory" : "gameOver"}
+                progress={progress}
+                distance={distance}
+                tempo={tempo}
+                record={record}
+                onPlayAgain={resetGame}
+              />
             )}
           </div>
         )}
