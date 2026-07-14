@@ -17,6 +17,8 @@ export function JogoPage() {
   const [helpOpen, setHelpOpen] = useState(false);
   const {
     status,
+    level,
+    round,
     board,
     readyCountdownMs,
     startGame,
@@ -26,13 +28,20 @@ export function JogoPage() {
     progress,
     distance,
     tempo,
+    tempoMs,
     resetGame,
   } = useGameEngine();
-  const { record } = useLocalRecord();
+  const { record, maybeUpdateRecord } = useLocalRecord();
 
   useEffect(() => {
     if (status === "idle") startGame();
   }, [status, startGame]);
+
+  useEffect(() => {
+    if (status === "gameOver" || status === "victory") {
+      maybeUpdateRecord(level, round, tempoMs);
+    }
+  }, [status, level, round, tempoMs, maybeUpdateRecord]);
 
   const showBoard =
     status === "showingSequence" ||

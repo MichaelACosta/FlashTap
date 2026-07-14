@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { HomePage } from "./HomePage";
 
-const { useTutorialFlagMock, dismissTutorial } = vi.hoisted(() => ({
+const { useTutorialFlagMock, dismissTutorial, toggleMode } = vi.hoisted(() => ({
   dismissTutorial: vi.fn(),
+  toggleMode: vi.fn(),
   useTutorialFlagMock: vi.fn(),
 }));
 
@@ -12,8 +13,13 @@ vi.mock("@/application", () => ({
   useTutorialFlag: useTutorialFlagMock,
 }));
 
+vi.mock("@/presentation/theme", () => ({
+  useThemeMode: () => ({ mode: "light", toggleMode }),
+}));
+
 beforeEach(() => {
   dismissTutorial.mockClear();
+  toggleMode.mockClear();
   useTutorialFlagMock.mockReturnValue({ shouldShowTutorial: false, dismissTutorial });
 });
 
@@ -49,5 +55,13 @@ describe("HomePage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Entendi" }));
 
     expect(dismissTutorial).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders a theme toggle that calls toggleMode when clicked (US-20)", () => {
+    render(<HomePage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Ativar tema escuro" }));
+
+    expect(toggleMode).toHaveBeenCalledTimes(1);
   });
 });
