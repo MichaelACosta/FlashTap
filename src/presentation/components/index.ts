@@ -5,3 +5,5 @@ export { HelpButton } from "./HelpButton";
 export { GameButton } from "./GameButton";
 export { Board } from "./Board";
 export { ReadyCountdown } from "./ReadyCountdown";
+export { SubmitButton } from "./SubmitButton";
+export { ResultSummary } from "./ResultSummary";

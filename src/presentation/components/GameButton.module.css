@@ -1,4 +1,5 @@
 .button {
+  position: relative;
   aspect-ratio: 1;
   width: 100%;
   border-radius: var(--radius-md);
@@ -35,7 +36,61 @@
 }
 
 .selected {
+  background: var(--btn-selected-bg);
+  border: 1px solid var(--btn-selected-border);
+  color: var(--btn-selected-text);
+}
+
+.selected::after {
+  content: "✓";
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--btn-selected-bg);
+  border: 1px solid var(--btn-selected-border);
+  color: var(--btn-selected-text);
+  font-family: var(--font-inter, sans-serif);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .selected {
+    animation: game-button-pop 0.2s ease-out;
+  }
 }
 
 .wrong {
+  background: var(--btn-wrong-bg);
+  border: 1px solid var(--btn-wrong-border);
+  color: var(--btn-wrong-text);
+}
+
+.wrong::after {
+  content: "✕";
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--btn-wrong-bg);
+  border: 1px solid var(--btn-wrong-border);
+  color: var(--btn-wrong-text);
+  font-family: var(--font-inter, sans-serif);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wrong {
+    animation: game-button-shake 0.4s ease;
+  }
 }

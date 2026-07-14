@@ -5,18 +5,21 @@ import {
   createInitialGameState,
   gameReducer,
   getButtonVisualState,
+  isSubmitEnabled,
   type GameAction,
   type GameEngineState,
   type GameStatus,
 } from "./gameEngine";
 
 describe("createInitialGameState", () => {
-  it("starts idle at level 1, round 1, with no sequence", () => {
+  it("starts idle at level 1, round 1, with no sequence, no selection, no wrong button", () => {
     expect(createInitialGameState()).toEqual({
       status: "idle",
       level: 1,
       round: 1,
       sequence: [],
+      selectedIds: [],
+      wrongButtonId: null,
     });
   });
 });
@@ -42,20 +45,27 @@ describe("gameReducer happy path (GRS §20)", () => {
     state = gameReducer(state, { type: "SEQUENCE_SHOWN" });
     expect(state.status).toBe("waitingInput");
     expect(state.sequence).toEqual(sequenceAfterReady);
+
+    const [correctId] = sequenceAfterReady;
+    state = gameReducer(state, { type: "SELECT_BUTTON", buttonId: correctId });
+    expect(state.status).toBe("waitingInput");
+    expect(state.selectedIds).toEqual([correctId]);
   });
 });
 
 describe("gameReducer invalid transitions are no-ops (GRS §22)", () => {
-  const statuses: GameStatus[] = ["idle", "ready", "showingSequence", "waitingInput"];
+  const statuses: GameStatus[] = ["idle", "ready", "showingSequence", "waitingInput", "gameOver"];
   const validFrom: Record<GameAction["type"], GameStatus> = {
     START_GAME: "idle",
     READY_COUNTDOWN_DONE: "ready",
     SEQUENCE_SHOWN: "showingSequence",
+    SELECT_BUTTON: "waitingInput",
   };
   const actions: GameAction[] = [
     { type: "START_GAME" },
     { type: "READY_COUNTDOWN_DONE" },
     { type: "SEQUENCE_SHOWN" },
+    { type: "SELECT_BUTTON", buttonId: 1 },
   ];
 
   actions.forEach((action) => {
@@ -68,11 +78,56 @@ describe("gameReducer invalid transitions are no-ops (GRS §22)", () => {
             level: 2,
             round: 3,
             sequence: [1, 2],
+            selectedIds: [],
+            wrongButtonId: null,
           };
 
           expect(gameReducer(state, action)).toEqual(state);
         });
       });
+  });
+});
+
+describe("gameReducer SELECT_BUTTON from waitingInput (GRS §10/§11)", () => {
+  const baseState: GameEngineState = {
+    status: "waitingInput",
+    level: 2,
+    round: 1,
+    sequence: [3, 7],
+    selectedIds: [],
+    wrongButtonId: null,
+  };
+
+  it("adds a correct, not-yet-selected id to selectedIds", () => {
+    const next = gameReducer(baseState, { type: "SELECT_BUTTON", buttonId: 3 });
+
+    expect(next.status).toBe("waitingInput");
+    expect(next.selectedIds).toEqual([3]);
+    expect(next.wrongButtonId).toBeNull();
+  });
+
+  it("ignores a click on an already-selected id (no-op)", () => {
+    const state: GameEngineState = { ...baseState, selectedIds: [3] };
+
+    expect(gameReducer(state, { type: "SELECT_BUTTON", buttonId: 3 })).toEqual(state);
+  });
+
+  it("ends the match on a click outside the sequence, recording the wrong button", () => {
+    const next = gameReducer(baseState, { type: "SELECT_BUTTON", buttonId: 9 });
+
+    expect(next.status).toBe("gameOver");
+    expect(next.wrongButtonId).toBe(9);
+    expect(next.selectedIds).toEqual([]);
+  });
+
+  it("preserves previously-selected ids when a later click is wrong", () => {
+    const state: GameEngineState = { ...baseState, selectedIds: [3] };
+
+    const next = gameReducer(state, { type: "SELECT_BUTTON", buttonId: 9 });
+
+    expect(next.status).toBe("gameOver");
+    expect(next.wrongButtonId).toBe(9);
+    expect(next.selectedIds).toEqual([3]);
   });
 });
 
@@ -83,6 +138,8 @@ describe("getButtonVisualState", () => {
       level: 1,
       round: 1,
       sequence: [3, 7],
+      selectedIds: [],
+      wrongButtonId: null,
     };
 
     expect(getButtonVisualState(showingState, 3)).toBe("showing");
@@ -93,22 +150,121 @@ describe("getButtonVisualState", () => {
   it.each<GameStatus>(["idle", "ready", "waitingInput"])(
     "treats every id as idle when status is %s, even if it is in the sequence",
     (status) => {
-      const state: GameEngineState = { status, level: 1, round: 1, sequence: [3, 7] };
+      const state: GameEngineState = {
+        status,
+        level: 1,
+        round: 1,
+        sequence: [3, 7],
+        selectedIds: [],
+        wrongButtonId: null,
+      };
 
       expect(getButtonVisualState(state, 3)).toBe("idle");
     },
   );
+
+  it("marks selected ids as selected during waitingInput", () => {
+    const state: GameEngineState = {
+      status: "waitingInput",
+      level: 1,
+      round: 1,
+      sequence: [3, 7],
+      selectedIds: [3],
+      wrongButtonId: null,
+    };
+
+    expect(getButtonVisualState(state, 3)).toBe("selected");
+    expect(getButtonVisualState(state, 7)).toBe("idle");
+  });
+
+  it("marks only the offending id as wrong during gameOver, never revealing the rest of the sequence", () => {
+    const state: GameEngineState = {
+      status: "gameOver",
+      level: 1,
+      round: 1,
+      sequence: [3, 7],
+      selectedIds: [3],
+      wrongButtonId: 9,
+    };
+
+    expect(getButtonVisualState(state, 9)).toBe("wrong");
+    expect(getButtonVisualState(state, 3)).toBe("selected");
+    // 7 belongs to the drawn sequence but was never clicked — must stay idle, not be revealed.
+    expect(getButtonVisualState(state, 7)).toBe("idle");
+  });
 });
 
 describe("canInteract", () => {
-  it.each<GameStatus>(["idle", "ready", "showingSequence"])(
+  it.each<GameStatus>(["idle", "ready", "showingSequence", "gameOver"])(
     "returns false when status is %s",
     (status) => {
-      expect(canInteract({ status, level: 1, round: 1, sequence: [] })).toBe(false);
+      expect(
+        canInteract({
+          status,
+          level: 1,
+          round: 1,
+          sequence: [],
+          selectedIds: [],
+          wrongButtonId: null,
+        }),
+      ).toBe(false);
     },
   );
 
   it("returns true only when status is waitingInput", () => {
-    expect(canInteract({ status: "waitingInput", level: 1, round: 1, sequence: [] })).toBe(true);
+    expect(
+      canInteract({
+        status: "waitingInput",
+        level: 1,
+        round: 1,
+        sequence: [],
+        selectedIds: [],
+        wrongButtonId: null,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("isSubmitEnabled", () => {
+  it.each(Array.from({ length: 12 }, (_, i) => i + 1))(
+    "is false until all %i selected ids match the sequence, then true",
+    (n) => {
+      const sequence = Array.from({ length: n }, (_, i) => i + 1);
+
+      for (let selectedCount = 0; selectedCount < n; selectedCount++) {
+        const state: GameEngineState = {
+          status: "waitingInput",
+          level: n,
+          round: 1,
+          sequence,
+          selectedIds: sequence.slice(0, selectedCount),
+          wrongButtonId: null,
+        };
+        expect(isSubmitEnabled(state)).toBe(false);
+      }
+
+      const complete: GameEngineState = {
+        status: "waitingInput",
+        level: n,
+        round: 1,
+        sequence,
+        selectedIds: sequence,
+        wrongButtonId: null,
+      };
+      expect(isSubmitEnabled(complete)).toBe(true);
+    },
+  );
+
+  it("is false outside waitingInput even when selection length matches the sequence", () => {
+    const state: GameEngineState = {
+      status: "gameOver",
+      level: 1,
+      round: 1,
+      sequence: [3],
+      selectedIds: [3],
+      wrongButtonId: 9,
+    };
+
+    expect(isSubmitEnabled(state)).toBe(false);
   });
 });

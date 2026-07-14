@@ -17,6 +17,12 @@
   --btn-showing-border: #e8650f;
   --btn-showing-text: #171a24;
   --btn-showing-glow: rgba(255, 138, 61, 0.55);
+  --btn-selected-bg: #17b8a6;
+  --btn-selected-border: #129c8d;
+  --btn-selected-text: #171a24;
+  --btn-wrong-bg: #e5484d;
+  --btn-wrong-border: #c93a3e;
+  --btn-wrong-text: #171a24;
 }
 
 [data-theme="dark"] {
@@ -34,6 +40,12 @@
   --btn-showing-border: #ffc98a;
   --btn-showing-text: #171a24;
   --btn-showing-glow: rgba(255, 169, 77, 0.5);
+  --btn-selected-bg: #2dd4bf;
+  --btn-selected-border: #22b3a0;
+  --btn-selected-text: #171a24;
+  --btn-wrong-bg: #ff5d63;
+  --btn-wrong-border: #e14850;
+  --btn-wrong-text: #171a24;
 }
 
 @keyframes game-button-glow-pulse {
@@ -45,6 +57,31 @@
   50% {
     box-shadow: 0 0 0 10px var(--btn-showing-glow);
     transform: scale(1.05);
+  }
+}
+
+@keyframes game-button-pop {
+  0% {
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes game-button-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
   }
 }
 
