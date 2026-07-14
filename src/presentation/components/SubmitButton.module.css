@@ -1,0 +1,21 @@
+.button {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--brand);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
+}
+
+.button:disabled {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border-color: var(--border);
+  cursor: default;
+}

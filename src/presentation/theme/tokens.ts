@@ -17,6 +17,12 @@ export const lightPalette = {
   btnShowingBorder: "#E8650F",
   btnShowingText: "#171A24",
   btnShowingGlow: "rgba(255, 138, 61, 0.55)",
+  btnSelectedBg: "#17B8A6",
+  btnSelectedBorder: "#129C8D",
+  btnSelectedText: "#171A24",
+  btnWrongBg: "#E5484D",
+  btnWrongBorder: "#C93A3E",
+  btnWrongText: "#171A24",
 };
 
 export const darkPalette = {
@@ -33,4 +39,10 @@ export const darkPalette = {
   btnShowingBorder: "#FFC98A",
   btnShowingText: "#171A24",
   btnShowingGlow: "rgba(255, 169, 77, 0.5)",
+  btnSelectedBg: "#2DD4BF",
+  btnSelectedBorder: "#22B3A0",
+  btnSelectedText: "#171A24",
+  btnWrongBg: "#FF5D63",
+  btnWrongBorder: "#E14850",
+  btnWrongText: "#171A24",
 };

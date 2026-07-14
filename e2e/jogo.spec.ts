@@ -25,3 +25,48 @@ test("uma nova partida mostra o countdown, exibe a sequência e libera a intera�
     await expect(button).toBeEnabled();
   }
 });
+
+test("selecionar o botão correto marca Selected e habilita Enviar (US-07/US-09)", async ({
+  page,
+}) => {
+  await page.goto("/jogo");
+
+  const showingButton = page.getByRole("button", { name: /destacado/ });
+  await expect(showingButton).toBeVisible({ timeout: 3000 });
+  const correctId = await showingButton.textContent();
+
+  await expect(page.getByRole("button", { name: /^Botão \d+$/ })).toHaveCount(12, {
+    timeout: 3000,
+  });
+
+  const submitButton = page.getByRole("button", { name: "Enviar" });
+  await expect(submitButton).toBeDisabled();
+
+  await page.getByRole("button", { name: `Botão ${correctId}`, exact: true }).click();
+
+  await expect(
+    page.getByRole("button", { name: `Botão ${correctId}, selecionado` }),
+  ).toBeDisabled();
+  await expect(submitButton).toBeEnabled();
+});
+
+test("clicar em um botão errado encerra a partida e mostra a tela de Game Over (US-08)", async ({
+  page,
+}) => {
+  await page.goto("/jogo");
+
+  const showingButton = page.getByRole("button", { name: /destacado/ });
+  await expect(showingButton).toBeVisible({ timeout: 3000 });
+  const correctId = await showingButton.textContent();
+
+  await expect(page.getByRole("button", { name: /^Botão \d+$/ })).toHaveCount(12, {
+    timeout: 3000,
+  });
+
+  const wrongId = correctId === "1" ? "2" : "1";
+  await page.getByRole("button", { name: `Botão ${wrongId}`, exact: true }).click();
+
+  await expect(page.getByRole("button", { name: `Botão ${wrongId}, incorreto` })).toBeDisabled();
+  await expect(page.getByRole("region", { name: "Fim de partida" })).toBeVisible();
+  await expect(page.getByText("1.1")).toBeVisible();
+});

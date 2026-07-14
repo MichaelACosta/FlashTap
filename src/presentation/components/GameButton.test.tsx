@@ -36,4 +36,29 @@ describe("GameButton", () => {
 
     expect(onClick).toHaveBeenCalledTimes(1);
   });
+
+  it("renders a selected button as disabled with a distinguishing aria-label (GRS §8/§10)", () => {
+    render(<GameButton id={5} state="selected" disabled={true} />);
+
+    const button = screen.getByRole("button", { name: "Botão 5, selecionado" });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("data-state", "selected");
+  });
+
+  it("ignores clicks on an already-selected button", () => {
+    const onClick = vi.fn();
+    render(<GameButton id={5} state="selected" disabled={true} onClick={onClick} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Botão 5, selecionado" }));
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("renders a wrong button with a distinguishing aria-label (GRS §8/§11)", () => {
+    render(<GameButton id={5} state="wrong" disabled={true} />);
+
+    const button = screen.getByRole("button", { name: "Botão 5, incorreto" });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("data-state", "wrong");
+  });
 });

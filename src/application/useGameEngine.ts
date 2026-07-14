@@ -2,12 +2,16 @@ import { useCallback, useEffect, useMemo, useReducer } from "react";
 import {
   BOARD_SIZE,
   canInteract,
+  computeDistance,
   computeExhibitionDurationMs,
   createInitialGameState,
+  formatProgress,
   gameReducer,
   getButtonVisualState,
   getSequenceLength,
+  isSubmitEnabled,
   READY_COUNTDOWN_MS,
+  type ButtonId,
   type ButtonVisualState,
   type GameStatus,
 } from "@/domain";
@@ -25,6 +29,10 @@ export type UseGameEngineResult = {
   board: BoardButtonViewModel[];
   readyCountdownMs: number;
   startGame: () => void;
+  selectButton: (id: ButtonId) => void;
+  isSubmitEnabled: boolean;
+  progress: string;
+  distance: string;
 };
 
 export function useGameEngine(): UseGameEngineResult {
@@ -55,11 +63,16 @@ export function useGameEngine(): UseGameEngineResult {
     dispatch({ type: "START_GAME" });
   }, []);
 
+  const selectButton = useCallback((id: ButtonId) => {
+    dispatch({ type: "SELECT_BUTTON", buttonId: id });
+  }, []);
+
   const board = useMemo<BoardButtonViewModel[]>(() => {
     const interactive = canInteract(state);
     return Array.from({ length: BOARD_SIZE }, (_, index) => {
       const id = index + 1;
-      return { id, state: getButtonVisualState(state, id), disabled: !interactive };
+      const buttonState = getButtonVisualState(state, id);
+      return { id, state: buttonState, disabled: !interactive || buttonState === "selected" };
     });
   }, [state]);
 
@@ -70,5 +83,9 @@ export function useGameEngine(): UseGameEngineResult {
     board,
     readyCountdownMs: READY_COUNTDOWN_MS,
     startGame,
+    selectButton,
+    isSubmitEnabled: isSubmitEnabled(state),
+    progress: formatProgress(state.level, state.round),
+    distance: computeDistance(state.level, state.round),
   };
 }

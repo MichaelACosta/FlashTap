@@ -15,6 +15,13 @@ const stateClassName: Record<ButtonVisualState, string> = {
   wrong: styles.wrong,
 };
 
+const stateAriaSuffix: Record<ButtonVisualState, string> = {
+  idle: "",
+  showing: ", destacado",
+  selected: ", selecionado",
+  wrong: ", incorreto",
+};
+
 export function GameButton({ id, state, disabled, onClick }: GameButtonProps) {
   return (
     <button
@@ -23,7 +30,7 @@ export function GameButton({ id, state, disabled, onClick }: GameButtonProps) {
       data-state={state}
       disabled={disabled}
       onClick={onClick}
-      aria-label={state === "showing" ? `Botão ${id}, destacado` : `Botão ${id}`}
+      aria-label={`Botão ${id}${stateAriaSuffix[state]}`}
     >
       {id}
     </button>

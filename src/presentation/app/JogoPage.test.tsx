@@ -2,13 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { JogoPage } from "./JogoPage";
 
-const { useGameEngineMock, startGame } = vi.hoisted(() => ({
+const { useGameEngineMock, useLocalRecordMock, startGame, selectButton } = vi.hoisted(() => ({
   startGame: vi.fn(),
+  selectButton: vi.fn(),
   useGameEngineMock: vi.fn(),
+  useLocalRecordMock: vi.fn(),
 }));
 
 vi.mock("@/application", () => ({
   useGameEngine: useGameEngineMock,
+  useLocalRecord: useLocalRecordMock,
 }));
 
 function buildBoard(overrides: Partial<Record<number, { state: string; disabled: boolean }>> = {}) {
@@ -19,16 +22,27 @@ function buildBoard(overrides: Partial<Record<number, { state: string; disabled:
   });
 }
 
-beforeEach(() => {
-  startGame.mockClear();
-  useGameEngineMock.mockReturnValue({
+function baseGameEngine(overrides: Record<string, unknown> = {}) {
+  return {
     status: "idle",
     level: 1,
     round: 1,
     board: buildBoard(),
     readyCountdownMs: 1500,
     startGame,
-  });
+    selectButton,
+    isSubmitEnabled: false,
+    progress: "1.1",
+    distance: "11 níveis e 4 rodadas",
+    ...overrides,
+  };
+}
+
+beforeEach(() => {
+  startGame.mockClear();
+  selectButton.mockClear();
+  useGameEngineMock.mockReturnValue(baseGameEngine());
+  useLocalRecordMock.mockReturnValue({ record: null });
 });
 
 describe("JogoPage", () => {
@@ -41,14 +55,7 @@ describe("JogoPage", () => {
   });
 
   it("shows the ready countdown while status is ready (GRS §20)", () => {
-    useGameEngineMock.mockReturnValue({
-      status: "ready",
-      level: 1,
-      round: 1,
-      board: buildBoard(),
-      readyCountdownMs: 1500,
-      startGame,
-    });
+    useGameEngineMock.mockReturnValue(baseGameEngine({ status: "ready" }));
 
     render(<JogoPage />);
 
@@ -57,38 +64,97 @@ describe("JogoPage", () => {
   });
 
   it("shows the board with the showing button disabled while status is showingSequence (US-05)", () => {
-    useGameEngineMock.mockReturnValue({
-      status: "showingSequence",
-      level: 1,
-      round: 1,
-      board: buildBoard({ 4: { state: "showing", disabled: true } }),
-      readyCountdownMs: 1500,
-      startGame,
-    });
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({
+        status: "showingSequence",
+        board: buildBoard({ 4: { state: "showing", disabled: true } }),
+      }),
+    );
 
     render(<JogoPage />);
 
     const showingButton = screen.getByRole("button", { name: "Botão 4, destacado" });
     expect(showingButton).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Enviar" })).not.toBeInTheDocument();
   });
 
-  it("shows the board with all buttons enabled while status is waitingInput (US-06)", () => {
-    useGameEngineMock.mockReturnValue({
-      status: "waitingInput",
-      level: 1,
-      round: 1,
-      board: buildBoard({
-        1: { state: "idle", disabled: false },
-        2: { state: "idle", disabled: false },
+  it("shows the board with all buttons enabled and a disabled Enviar while status is waitingInput (US-06/US-09)", () => {
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({
+        status: "waitingInput",
+        board: buildBoard({
+          1: { state: "idle", disabled: false },
+          2: { state: "idle", disabled: false },
+        }),
+        isSubmitEnabled: false,
       }),
-      readyCountdownMs: 1500,
-      startGame,
-    });
+    );
 
     render(<JogoPage />);
 
     expect(screen.getAllByRole("button", { name: /^Botão/ })).toHaveLength(12);
     expect(screen.getByRole("button", { name: "Botão 1" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled();
+  });
+
+  it("calls selectButton when a board button is clicked during waitingInput (US-07)", () => {
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({
+        status: "waitingInput",
+        board: buildBoard({ 3: { state: "idle", disabled: false } }),
+      }),
+    );
+
+    render(<JogoPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Botão 3" }));
+
+    expect(selectButton).toHaveBeenCalledWith(3);
+  });
+
+  it("does not wire board clicks to selectButton outside waitingInput (defense in depth)", () => {
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({
+        status: "showingSequence",
+        board: buildBoard({ 3: { state: "idle", disabled: false } }),
+      }),
+    );
+
+    render(<JogoPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Botão 3" }));
+
+    expect(selectButton).not.toHaveBeenCalled();
+  });
+
+  it("enables Enviar when isSubmitEnabled is true (US-09)", () => {
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({ status: "waitingInput", isSubmitEnabled: true }),
+    );
+
+    render(<JogoPage />);
+
+    expect(screen.getByRole("button", { name: "Enviar" })).toBeEnabled();
+  });
+
+  it("shows the result summary and disables the whole board on gameOver, without an Enviar button (US-08)", () => {
+    useLocalRecordMock.mockReturnValue({ record: "3.2" });
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({
+        status: "gameOver",
+        board: buildBoard({ 5: { state: "wrong", disabled: true } }),
+        progress: "1.1",
+        distance: "11 níveis e 4 rodadas",
+      }),
+    );
+
+    render(<JogoPage />);
+
+    expect(screen.getByRole("region", { name: "Fim de partida" })).toBeInTheDocument();
+    expect(screen.getByText("1.1")).toBeInTheDocument();
+    expect(screen.getByText("3.2")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Enviar" })).not.toBeInTheDocument();
+    screen.getAllByRole("button", { name: /^Botão/ }).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
   });
 
   it("opens the How To Play modal when the help button is clicked (US-04)", () => {
