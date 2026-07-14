@@ -8,4 +8,6 @@ export { useGameTimer } from "./useGameTimer";
 export type { UseGameTimerResult } from "./useGameTimer";
 export { useThemePreference } from "./useThemePreference";
 export type { UseThemePreferenceResult } from "./useThemePreference";
+export { useAnalyticsConsent } from "./useAnalyticsConsent";
+export type { UseAnalyticsConsentResult } from "./useAnalyticsConsent";
 export type { ButtonVisualState } from "@/domain";

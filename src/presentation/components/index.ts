@@ -9,3 +9,4 @@ export { SubmitButton } from "./SubmitButton";
 export { ResultSummary } from "./ResultSummary";
 export { Timer } from "./Timer";
 export { ThemeToggle } from "./ThemeToggle";
+export { CookieConsentBanner } from "./CookieConsentBanner";
