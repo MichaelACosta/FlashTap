@@ -17,7 +17,7 @@ Cada ADR (Architecture Decision Record) documenta uma decisão técnica isolada:
 - [ADR-003 — Mutation testing: StrykerJS](adr/0003-mutation-testing-strykerjs.md)
 - [ADR-004 — E2E automatizado: Playwright](adr/0004-e2e-automatizado-playwright.md)
 - [ADR-005 — Gerenciador de pacotes e enforcement de Clean Architecture: pnpm + eslint-plugin-boundaries](adr/0005-gerenciador-de-pacotes-e-enforcement-de-clean-architecture.md)
-- [ADR-006 — Hospedagem e Deploy: Next.js Static Export no Cloudflare Pages](adr/0006-hospedagem-e-deploy-nextjs-static-export-cloudflare-pages.md)
+- [ADR-006 — Hospedagem e Deploy: Next.js Static Export no GitHub Pages](adr/0006-hospedagem-e-deploy-nextjs-static-export-github-pages.md)
 - [ADR-007 — Observabilidade: Error Boundary + Sentry (client-side)](adr/0007-observabilidade-error-boundary-sentry.md)
 - [ADR-008 — Contrato e versionamento de dados no LocalStorage](adr/0008-contrato-e-versionamento-de-dados-no-localstorage.md)
 - [ADR-009 — Padrão de componentes: Container/Presentational](adr/0009-padrao-de-componentes-container-presentational.md)
@@ -49,6 +49,10 @@ src/
     theme/              → Design tokens (paleta do GRS seção 8, variantes claro/escuro) via
                           ConfigProvider do Ant Design; detecção de prefers-color-scheme.
     error-boundary/      → Error Boundary global + fallback de UI.
+    analytics/           → Consentimento de cookies (LGPD) + carregamento condicional
+                          do script do Microsoft Clarity.
+
+src/instrumentation-client.ts → Inicialização condicional do Sentry (client-side).
 
 .nvmrc                  → Versão de Node fixada
 pnpm-lock.yaml           → Commitado, builds reprodutíveis
@@ -69,7 +73,7 @@ pnpm-lock.yaml           → Commitado, builds reprodutíveis
 | Teste de componente (presentation) | Vitest + React Testing Library |
 | Teste de mutação | StrykerJS, focado em `domain`, meta inicial de 80% |
 | Teste E2E | Playwright, perfil mobile como padrão |
-| Deploy/Hospedagem | Next.js static export, Cloudflare Pages, preview automático por PR |
+| Deploy/Hospedagem | Next.js static export, GitHub Pages via GitHub Actions (sem preview por PR) |
 | Observação de uso/comportamento | Microsoft Clarity (heatmap + gravação de sessão, gratuito e sem cap) |
 | Observabilidade | React Error Boundary + Sentry (free tier) |
 | Validação de dados persistidos | Zod, chaves versionadas (`flashtap:v1:record`, `:preferences`, `:tutorial-seen`) |
@@ -83,6 +87,6 @@ pnpm-lock.yaml           → Commitado, builds reprodutíveis
 ## Riscos e Decisões que Seguem em Aberto (fora da alçada técnica)
 
 - **Orçamento de Sentry**: free tier assumido para o MVP; se o volume de erros/usuários crescer, é decisão de negócio aprovar plano pago.
-- **Domínio próprio**: não foi definido se o produto terá domínio customizado (custo/registro) ou ficará no subdomínio padrão do Cloudflare Pages (`projeto.pages.dev`) — decisão de PO/negócio, não técnica.
+- **Domínio próprio**: não foi definido se o produto terá domínio customizado (custo/registro via `CNAME`) ou ficará no domínio padrão do GitHub Pages (`<owner>.github.io/FlashTap`) — decisão de PO/negócio, não técnica.
 - **Banner de consentimento de cookies (LGPD)**: necessário por causa do Microsoft Clarity coletar dados comportamentais; conteúdo/texto do banner é decisão de produto, não técnica.
 - **Meta de mutation score (80%)**: número inicial definido pelo TL: deve ser revisto com o time após o primeiro ciclo real de execução do Stryker, pode ser ajustado para cima ou para baixo.

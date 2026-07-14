@@ -496,11 +496,11 @@ Histórias puramente técnicas/de infraestrutura (Feature 9) não recebem pontua
 
 ---
 
-### US-22 — Deploy automático + preview por PR
+### US-22 — Deploy automático no GitHub Pages
 
-**Como** time, **queremos** deploy automático no Cloudflare Pages com preview por PR, **para** revisar mudanças antes do merge.
+**Como** time, **queremos** deploy automático no GitHub Pages a cada push em `main`, **para** publicar a versão mais recente sem depender de conta ou plataforma externa ao GitHub.
 
-**Refinamento Técnico (TL):** conforme ADR-006; configurar `output: 'export'` no Next.js e conectar repositório à Cloudflare Pages.
+**Refinamento Técnico (TL):** conforme ADR-006 (revisão 2); configurar `output: 'export'` no Next.js e publicar via workflow de GitHub Actions (`actions/upload-pages-artifact` + `actions/deploy-pages`). Sem preview automático por PR — trade-off aceito; CI (US-21) já valida todo PR antes do merge.
 
 ---
 
