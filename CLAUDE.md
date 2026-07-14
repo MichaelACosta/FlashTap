@@ -24,7 +24,7 @@ Toda decisão de produto, regra de jogo e arquitetura já está documentada — 
 
 ## Status atual
 
-Sprints 0 a 4 concluídos e mesclados: F0 (Setup), F1 (Home), F2 (Onboarding), F3 (Motor de Jogo, US-05–09) e F4 (Progressão, US-10–12). A estrutura `src/domain|application|infrastructure|presentation` já está populada, com tooling completo (ESLint/Prettier, Vitest, Stryker, Playwright). Em andamento/pendentes: F5 (Timer, US-13), F6 (Resultado, US-14–16), F7 (Persistência Local, US-17–20) e F9 (Enablers Técnicos, US-21–24).
+MVP completo: as 29 histórias do backlog (F0–F9, US-00a a US-24) estão implementadas e mescladas — F0 (Setup), F1 (Home), F2 (Onboarding), F3 (Motor de Jogo, US-05–09), F4 (Progressão, US-10–12), F5 (Timer, US-13), F6 (Resultado, US-14–16), F7 (Persistência Local, US-17–20) e F9 (Enablers Técnicos: CI, deploy no GitHub Pages, Sentry, consentimento/Clarity, US-21–24). A estrutura `src/domain|application|infrastructure|presentation` está populada, com tooling completo (ESLint/Prettier, Vitest, Stryker, Playwright).
 
 ## Como trabalhar uma história
 
