@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { JogoPage } from "./JogoPage";
 
-const { useGameEngineMock, useLocalRecordMock, startGame, selectButton } = vi.hoisted(() => ({
-  startGame: vi.fn(),
-  selectButton: vi.fn(),
-  useGameEngineMock: vi.fn(),
-  useLocalRecordMock: vi.fn(),
-}));
+const { useGameEngineMock, useLocalRecordMock, startGame, selectButton, submitRound } =
+  vi.hoisted(() => ({
+    startGame: vi.fn(),
+    selectButton: vi.fn(),
+    submitRound: vi.fn(),
+    useGameEngineMock: vi.fn(),
+    useLocalRecordMock: vi.fn(),
+  }));
 
 vi.mock("@/application", () => ({
   useGameEngine: useGameEngineMock,
@@ -31,6 +33,7 @@ function baseGameEngine(overrides: Record<string, unknown> = {}) {
     readyCountdownMs: 1500,
     startGame,
     selectButton,
+    submitRound,
     isSubmitEnabled: false,
     progress: "1.1",
     distance: "11 níveis e 4 rodadas",
@@ -41,6 +44,7 @@ function baseGameEngine(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   startGame.mockClear();
   selectButton.mockClear();
+  submitRound.mockClear();
   useGameEngineMock.mockReturnValue(baseGameEngine());
   useLocalRecordMock.mockReturnValue({ record: null });
 });
@@ -135,6 +139,17 @@ describe("JogoPage", () => {
     expect(screen.getByRole("button", { name: "Enviar" })).toBeEnabled();
   });
 
+  it("calls submitRound when Enviar is clicked (US-10)", () => {
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({ status: "waitingInput", isSubmitEnabled: true }),
+    );
+
+    render(<JogoPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+
+    expect(submitRound).toHaveBeenCalledTimes(1);
+  });
+
   it("shows the result summary and disables the whole board on gameOver, without an Enviar button (US-08)", () => {
     useLocalRecordMock.mockReturnValue({ record: "3.2" });
     useGameEngineMock.mockReturnValue(
@@ -151,6 +166,32 @@ describe("JogoPage", () => {
     expect(screen.getByRole("region", { name: "Fim de partida" })).toBeInTheDocument();
     expect(screen.getByText("1.1")).toBeInTheDocument();
     expect(screen.getByText("3.2")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Enviar" })).not.toBeInTheDocument();
+    screen.getAllByRole("button", { name: /^Botão/ }).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
+  });
+
+  it("shows the result summary and disables the whole board on victory, without an Enviar button (US-12)", () => {
+    useLocalRecordMock.mockReturnValue({ record: "10.3" });
+    useGameEngineMock.mockReturnValue(
+      baseGameEngine({
+        status: "victory",
+        board: buildBoard(
+          Object.fromEntries(
+            Array.from({ length: 12 }, (_, i) => [i + 1, { state: "selected", disabled: true }]),
+          ),
+        ),
+        progress: "12.5",
+        distance: "Concluído",
+      }),
+    );
+
+    render(<JogoPage />);
+
+    expect(screen.getByRole("region", { name: "Fim de partida" })).toBeInTheDocument();
+    expect(screen.getByText("12.5")).toBeInTheDocument();
+    expect(screen.getByText("Concluído")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Enviar" })).not.toBeInTheDocument();
     screen.getAllByRole("button", { name: /^Botão/ }).forEach((button) => {
       expect(button).toBeDisabled();

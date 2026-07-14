@@ -30,6 +30,7 @@ export type UseGameEngineResult = {
   readyCountdownMs: number;
   startGame: () => void;
   selectButton: (id: ButtonId) => void;
+  submitRound: () => void;
   isSubmitEnabled: boolean;
   progress: string;
   distance: string;
@@ -67,6 +68,10 @@ export function useGameEngine(): UseGameEngineResult {
     dispatch({ type: "SELECT_BUTTON", buttonId: id });
   }, []);
 
+  const submitRound = useCallback(() => {
+    dispatch({ type: "SUBMIT_ROUND_SUCCESS" });
+  }, []);
+
   const board = useMemo<BoardButtonViewModel[]>(() => {
     const interactive = canInteract(state);
     return Array.from({ length: BOARD_SIZE }, (_, index) => {
@@ -84,6 +89,7 @@ export function useGameEngine(): UseGameEngineResult {
     readyCountdownMs: READY_COUNTDOWN_MS,
     startGame,
     selectButton,
+    submitRound,
     isSubmitEnabled: isSubmitEnabled(state),
     progress: formatProgress(state.level, state.round),
     distance: computeDistance(state.level, state.round),

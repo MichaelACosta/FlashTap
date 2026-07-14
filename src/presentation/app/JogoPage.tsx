@@ -20,6 +20,7 @@ export function JogoPage() {
     readyCountdownMs,
     startGame,
     selectButton,
+    submitRound,
     isSubmitEnabled,
     progress,
     distance,
@@ -31,7 +32,11 @@ export function JogoPage() {
   }, [startGame]);
 
   const showBoard =
-    status === "showingSequence" || status === "waitingInput" || status === "gameOver";
+    status === "showingSequence" ||
+    status === "waitingInput" ||
+    status === "gameOver" ||
+    status === "victory";
+  const showResult = status === "gameOver" || status === "victory";
 
   return (
     <div className={styles.page}>
@@ -47,11 +52,11 @@ export function JogoPage() {
               onButtonClick={status === "waitingInput" ? selectButton : undefined}
             />
             {status === "waitingInput" && (
-              // TODO(US-10): wire onClick once round/level progression exists.
-              <SubmitButton disabled={!isSubmitEnabled} />
+              <SubmitButton disabled={!isSubmitEnabled} onClick={submitRound} />
             )}
-            {status === "gameOver" && (
+            {showResult && (
               // TODO(US-13): pass the real elapsed time once useGameTimer exists.
+              // TODO(US-15): distinct visual treatment for victory vs. game over.
               <ResultSummary progress={progress} distance={distance} tempo={null} record={record} />
             )}
           </div>
