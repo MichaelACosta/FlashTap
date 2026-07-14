@@ -4,4 +4,6 @@ export { useTutorialFlag } from "./useTutorialFlag";
 export type { UseTutorialFlagResult } from "./useTutorialFlag";
 export { useGameEngine } from "./useGameEngine";
 export type { BoardButtonViewModel, UseGameEngineResult } from "./useGameEngine";
+export { useGameTimer } from "./useGameTimer";
+export type { UseGameTimerResult } from "./useGameTimer";
 export type { ButtonVisualState } from "@/domain";

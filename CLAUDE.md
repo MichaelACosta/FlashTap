@@ -24,7 +24,7 @@ Toda decisão de produto, regra de jogo e arquitetura já está documentada — 
 
 ## Status atual
 
-O repositório ainda não foi escafoldado — não existe `package.json`, `src/`, nem configuração de projeto. O primeiro trabalho de implementação é o **Sprint 0** (Feature F0 do backlog: US-00a a US-00e — init do Next.js/TS, estrutura de pastas, ESLint/Prettier, Ant Design, scaffolding da pirâmide de testes), pré-requisito para todas as demais features.
+Sprints 0 a 4 concluídos e mesclados: F0 (Setup), F1 (Home), F2 (Onboarding), F3 (Motor de Jogo, US-05–09) e F4 (Progressão, US-10–12). A estrutura `src/domain|application|infrastructure|presentation` já está populada, com tooling completo (ESLint/Prettier, Vitest, Stryker, Playwright). Em andamento/pendentes: F5 (Timer, US-13), F6 (Resultado, US-14–16), F7 (Persistência Local, US-17–20) e F9 (Enablers Técnicos, US-21–24).
 
 ## Como trabalhar uma história
 

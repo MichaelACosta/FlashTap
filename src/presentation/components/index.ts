@@ -7,3 +7,4 @@ export { Board } from "./Board";
 export { ReadyCountdown } from "./ReadyCountdown";
 export { SubmitButton } from "./SubmitButton";
 export { ResultSummary } from "./ResultSummary";
+export { Timer } from "./Timer";
